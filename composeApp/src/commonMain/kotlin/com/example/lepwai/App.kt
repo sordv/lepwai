@@ -26,12 +26,46 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import com.example.lepwai.screens.ChatScreen
-import com.example.lepwai.screens.LearningScreen
-import com.example.lepwai.screens.ProfileScreen
+import com.example.lepwai.screens.*
 import com.example.lepwai.theme.AppColors
+import com.example.lepwai.data.SettingsRepo
+import com.example.lepwai.network.AuthApi
+import com.example.lepwai.network.createHttpClient
+import io.ktor.client.*
 
 @Composable
-fun App() {
+fun App(settingsRepo: SettingsRepo) {
+    val httpClient: HttpClient = remember { createHttpClient() }
+    val authApi: AuthApi = remember { AuthApi(httpClient, "http://10.0.2.2:8080") }
+    var loggedInUser by remember { mutableStateOf(settingsRepo.loadLogin()) }
+    var authScreen by remember { mutableStateOf("login") }
+
+    // Если никто не вошёл — показываем экран входа/регистрации
+    if (loggedInUser == null) {
+        when (authScreen) {
+            "login" -> LoginScreen(
+                authApi = authApi,
+                settingsRepo = settingsRepo,
+                onLoginSuccess = { login ->
+                    settingsRepo.saveCurrentLogin(login)
+                    loggedInUser = login
+                },
+                onNavigateToRegister = { authScreen = "register" }
+            )
+            "register" -> RegisterScreen(
+                authApi = authApi,
+                settingsRepo = settingsRepo,
+                onRegisterSuccess = { login ->
+                    settingsRepo.saveCurrentLogin(login)
+                    loggedInUser = login
+                },
+                onNavigateToLogin = { authScreen = "login" }
+            )
+        }
+        return
+    }
+
+    // если выполнен вход
     var selectedScreen by remember { mutableStateOf("learning") }
 
     val screens = listOf(
@@ -82,7 +116,13 @@ fun App() {
                 when (selectedScreen) {
                     "learning" -> LearningScreen()
                     "chat" -> ChatScreen()
-                    "profile" -> ProfileScreen()
+                    "profile" -> ProfileScreen(
+                        settingsRepo = settingsRepo,
+                        onLogout = {
+                            settingsRepo.saveCurrentLogin(null)
+                            loggedInUser = null
+                        }
+                    )
                 }
             }
         }

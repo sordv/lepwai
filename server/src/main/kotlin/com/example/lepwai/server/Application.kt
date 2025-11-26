@@ -2,6 +2,7 @@ package com.example.lepwai.server
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.ktor.http.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.application.*
@@ -9,12 +10,18 @@ import io.ktor.server.response.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
 import java.time.Instant
 import kotlin.system.exitProcess
 
@@ -29,6 +36,18 @@ data class Health(val status: String, val ts: String)
 
 @Serializable
 data class DbTestResult(val ok: Boolean, val result: Int?, val error: String?)
+
+@Serializable
+data class RegisterRequest(val login: String, val password: String, val passwordRepeat: String)
+
+@Serializable
+data class RegisterResponse(val ok: Boolean, val error: String? = null)
+
+@Serializable
+data class LoginRequest(val login: String, val password: String)
+
+@Serializable
+data class LoginResponse(val ok: Boolean, val error: String? = null, val login: String? = null)
 
 fun hikariDataSource(
     host: String,
@@ -113,6 +132,60 @@ fun main() {
             post("/echo") {
                 val body = call.receiveText()
                 call.respondText("echo: $body")
+            }
+
+            post("/register") {
+                val req = call.receive<RegisterRequest>()
+
+                // Валидация (сервера) — правила, которые вы просили:
+                if (req.login.isBlank() || req.login.length > 30) {
+                    call.respond(HttpStatusCode.BadRequest, RegisterResponse(false, "Логин должен быть не пустым и до 30 символов"))
+                    return@post
+                }
+                if (req.password.length < 8 || req.password.length > 30) {
+                    call.respond(HttpStatusCode.BadRequest, RegisterResponse(false, "Пароль должен быть от 8 до 30 символов"))
+                    return@post
+                }
+                if (req.password != req.passwordRepeat) {
+                    call.respond(HttpStatusCode.BadRequest, RegisterResponse(false, "Пароли не совпадают"))
+                    return@post
+                }
+
+                try {
+                    val existed = transaction {
+                        Users.select { Users.login eq req.login }.count() > 0
+                    }
+                    if (existed) {
+                        call.respond(HttpStatusCode.Conflict, RegisterResponse(false, "Логин уже занят"))
+                        return@post
+                    }
+                    // Вставляем (без хэширования — как вы просили)
+                    transaction {
+                        Users.insert {
+                            it[login] = req.login
+                            it[password] = req.password
+                        }
+                    }
+                    call.respond(HttpStatusCode.OK, RegisterResponse(true, null))
+                } catch (t: Throwable) {
+                    call.respond(HttpStatusCode.InternalServerError, RegisterResponse(false, "Ошибка на сервере: ${t.message}"))
+                }
+            }
+
+            post("/login") {
+                val req = call.receive<LoginRequest>()
+                try {
+                    val userExists = transaction {
+                        Users.select { (Users.login eq req.login) and (Users.password eq req.password) }.count() > 0
+                    }
+                    if (userExists) {
+                        call.respond(HttpStatusCode.OK, LoginResponse(true, null, req.login))
+                    } else {
+                        call.respond(HttpStatusCode.Unauthorized, LoginResponse(false, "Неверный логин или пароль"))
+                    }
+                } catch (t: Throwable) {
+                    call.respond(HttpStatusCode.InternalServerError, LoginResponse(false, "Ошибка на сервере: ${t.message}"))
+                }
             }
         }
     }.start(wait = true)

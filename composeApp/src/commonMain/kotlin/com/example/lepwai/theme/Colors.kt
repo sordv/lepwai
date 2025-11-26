@@ -35,6 +35,9 @@ object AppColors {
     val DifficultyMedium = Color(0xFFF8B201) // #F8B201
     // сложность средней задачи литкода
 
-    val DifficultyHard = Color(0xFFf6342e) // ##f6342e
+    val DifficultyHard = Color(0xFFf6342e) // #f6342e
     // сложность трудной задачи литкода
+
+    val ErrorRed = Color(0xFFFF0000) // #FF0000
+    // текст ошибки
 }
