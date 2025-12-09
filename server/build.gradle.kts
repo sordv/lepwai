@@ -43,6 +43,9 @@ dependencies {
 
     // Optional
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+
+    // Hash
+    implementation("at.favre.lib:bcrypt:0.9.0")
 }
 
 tasks.withType<KotlinCompile> {

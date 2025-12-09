@@ -24,10 +24,11 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import java.time.Instant
 import kotlin.system.exitProcess
+import at.favre.lib.crypto.bcrypt.BCrypt
 
 object Users : Table("users") {
     val login = varchar("login", 30)
-    val password = varchar("password", 30)
+    val password = varchar("password", 60)
     override val primaryKey = PrimaryKey(login)
 }
 
@@ -159,11 +160,12 @@ fun main() {
                         call.respond(HttpStatusCode.Conflict, RegisterResponse(false, "Логин уже занят"))
                         return@post
                     }
-                    // Вставляем (без хэширования — как вы просили)
+                    val hashed = BCrypt.withDefaults().hashToString(10, req.password.toCharArray())
+
                     transaction {
                         Users.insert {
                             it[login] = req.login
-                            it[password] = req.password
+                            it[password] = hashed
                         }
                     }
                     call.respond(HttpStatusCode.OK, RegisterResponse(true, null))
@@ -175,10 +177,17 @@ fun main() {
             post("/login") {
                 val req = call.receive<LoginRequest>()
                 try {
-                    val userExists = transaction {
-                        Users.select { (Users.login eq req.login) and (Users.password eq req.password) }.count() > 0
+                    val userVerified  = transaction {
+                        val row = Users.select { Users.login eq req.login }.limit(1).firstOrNull()
+                        if (row == null) {
+                            false
+                        } else {
+                            val storedHash = row[Users.password]
+                            val result = BCrypt.verifyer().verify(req.password.toCharArray(), storedHash)
+                            result.verified
+                        }
                     }
-                    if (userExists) {
+                    if (userVerified) {
                         call.respond(HttpStatusCode.OK, LoginResponse(true, null, req.login))
                     } else {
                         call.respond(HttpStatusCode.Unauthorized, LoginResponse(false, "Неверный логин или пароль"))
