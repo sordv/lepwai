@@ -19,7 +19,8 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import java.time.Instant
@@ -30,6 +31,13 @@ object Users : Table("users") {
     val login = varchar("login", 30)
     val password = varchar("password", 60)
     override val primaryKey = PrimaryKey(login)
+}
+
+object Courses : org.jetbrains.exposed.sql.Table("courses") {
+    val id = integer("id")
+    val name = varchar("name", 30)
+    val sort = integer("sort")
+    override val primaryKey = PrimaryKey(id)
 }
 
 @Serializable
@@ -49,6 +57,9 @@ data class LoginRequest(val login: String, val password: String)
 
 @Serializable
 data class LoginResponse(val ok: Boolean, val error: String? = null, val login: String? = null)
+
+@kotlinx.serialization.Serializable
+data class CourseDTO(val id: Int, val name: String, val sort: Int)
 
 fun hikariDataSource(
     host: String,
@@ -194,6 +205,29 @@ fun main() {
                     }
                 } catch (t: Throwable) {
                     call.respond(HttpStatusCode.InternalServerError, LoginResponse(false, "Ошибка на сервере: ${t.message}"))
+                }
+            }
+
+            get("/courses") {
+                if (db == null) {
+                    call.respond(HttpStatusCode.InternalServerError, "DB connection is not configured")
+                    return@get
+                }
+                try {
+                    val courses = transaction(db) {
+                        Courses.selectAll()
+                            .orderBy(Courses.sort to SortOrder.ASC)
+                            .map { row ->
+                                CourseDTO(
+                                    id = row[Courses.id],
+                                    name = row[Courses.name],
+                                    sort = row[Courses.sort]
+                                )
+                            }
+                    }
+                    call.respond(courses)
+                } catch (t: Throwable) {
+                    call.respond(HttpStatusCode.InternalServerError, mapOf("error" to (t.message ?: "unknown")))
                 }
             }
         }
