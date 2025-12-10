@@ -36,7 +36,7 @@ fun ProfileScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                //.background(AppColors.DifficultyEasy)
+                .background(AppColors.DifficultyEasy) //TODO: UBRAT POTOM
                 .padding(25.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically

@@ -12,26 +12,52 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lepwai.network.CoursesApi
-import com.example.lepwai.network.createHttpClient
 import com.example.lepwai.network.Course
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.example.lepwai.network.createHttpClient
 import com.example.lepwai.theme.AppColors
+import kotlinx.coroutines.launch
 
 @Composable
 fun LearningScreen() {
+
+    var selectedCourse by remember { mutableStateOf<Course?>(null) }
+
+    selectedCourse?.let { course ->
+        LearningDeepScreen(
+            courseId = course.id,
+            courseName = course.name,
+            onBack = { selectedCourse = null }
+        )
+        return
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(AppColors.BackgroundBlack)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Курсы",
-            color = AppColors.TextWhite,
-            fontSize = 36.sp
-        )
+
+        // TOP BAR
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(AppColors.BackgroundBlack)
+                .background(AppColors.DifficultyEasy) //TODO: UBRAT POTOM
+                .padding(25.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.size(65.dp)) // заглушка
+
+            Text(
+                text = "Курсы",
+                color = AppColors.TextWhite,
+                fontSize = 36.sp
+            )
+
+            Box(modifier = Modifier.size(65.dp)) // заглушка
+        }
+        // END TOP BAR
 
         var courses by remember { mutableStateOf<List<Course>>(emptyList()) }
         var loading by remember { mutableStateOf(true) }
@@ -63,36 +89,45 @@ fun LearningScreen() {
             }
         }
 
-        when {
-            courses.isNotEmpty() -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(vertical = 28.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    items(courses) { course ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(60.dp)
-                                .clickable {
-                                    // TODO: навигация
-                                }
-                                .padding(start = 12.dp),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            Text(
-                                text = course.name,
-                                color = AppColors.TextWhite,
-                                fontSize = 32.sp
-                            )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            when {
+                courses.isNotEmpty() -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(vertical = 28.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        items(courses) { course ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(60.dp)
+                                    .clickable { selectedCourse = course }
+                                    .padding(start = 12.dp),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                Text(
+                                    text = course.name,
+                                    color = AppColors.TextWhite,
+                                    fontSize = 32.sp
+                                )
+                            }
                         }
                     }
                 }
-            }
 
-            showLoading -> Text("Загрузка...", color = AppColors.TextWhite, modifier = Modifier.padding(top = 8.dp))
-            showError -> Text("Ошибка: $error", color = AppColors.ErrorRed, modifier = Modifier.padding(top = 8.dp))
+                showLoading ->
+                    Text("Загрузка...", color = AppColors.TextWhite, modifier = Modifier.padding(top = 8.dp))
+
+                showError ->
+                    Text("Ошибка: $error", color = AppColors.ErrorRed, modifier = Modifier.padding(top = 8.dp))
+            }
         }
     }
 }

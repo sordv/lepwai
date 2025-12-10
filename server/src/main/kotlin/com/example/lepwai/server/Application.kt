@@ -40,6 +40,14 @@ object Courses : org.jetbrains.exposed.sql.Table("courses") {
     override val primaryKey = PrimaryKey(id)
 }
 
+object Topics : Table("topics") {
+    val id = integer("id")
+    val name = varchar("name", 60)
+    val sort = integer("sort")
+    val parent = integer("parent")
+    override val primaryKey = PrimaryKey(id)
+}
+
 @Serializable
 data class Health(val status: String, val ts: String)
 
@@ -60,6 +68,9 @@ data class LoginResponse(val ok: Boolean, val error: String? = null, val login: 
 
 @kotlinx.serialization.Serializable
 data class CourseDTO(val id: Int, val name: String, val sort: Int)
+
+@kotlinx.serialization.Serializable
+data class TopicDTO(val id: Int, val name: String, val sort: Int, val parent: Int)
 
 fun hikariDataSource(
     host: String,
@@ -228,6 +239,40 @@ fun main() {
                     call.respond(courses)
                 } catch (t: Throwable) {
                     call.respond(HttpStatusCode.InternalServerError, mapOf("error" to (t.message ?: "unknown")))
+                }
+            }
+
+            get("/courses/{courseId}/topics") {
+                if (db == null) {
+                    call.respond(HttpStatusCode.InternalServerError, "DB connection missing")
+                    return@get
+                }
+
+                val courseId = call.parameters["courseId"]?.toIntOrNull()
+                if (courseId == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Bad courseId")
+                    return@get
+                }
+
+                try {
+                    val topics = transaction(db) {
+                        Topics.select { Topics.parent eq courseId }
+                            .orderBy(Topics.sort to SortOrder.ASC)
+                            .map { row ->
+                                TopicDTO(
+                                    id = row[Topics.id],
+                                    name = row[Topics.name],
+                                    sort = row[Topics.sort],
+                                    parent = row[Topics.parent]
+                                )
+                            }
+                    }
+                    call.respond(topics)
+                } catch (t: Throwable) {
+                    call.respond(
+                        HttpStatusCode.InternalServerError,
+                        mapOf("error" to (t.message ?: "unknown"))
+                    )
                 }
             }
         }
