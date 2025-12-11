@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Course(val id: Int, val name: String, val sort: Int)
 
-class CoursesApi(private val client: HttpClient, private val baseUrl: String) {
+class ChooseCourseApi(private val client: HttpClient, private val baseUrl: String) {
     suspend fun getCourses(): List<Course> {
         return client.get("$baseUrl/courses").body<List<Course>>()
     }

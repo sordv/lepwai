@@ -15,26 +15,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lepwai.network.Level
-import com.example.lepwai.network.LevelsApi
+import com.example.lepwai.network.ChooseLevelApi
 import com.example.lepwai.network.createHttpClient
 import com.example.lepwai.theme.AppColors
 
 @Composable
-fun LevelScreen(
+fun ChooseLevel(
     topicId: Int,
     topicName: String,
     onLevelClick: (Level) -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     val client = remember { createHttpClient() }
-    val levelsApi = remember { LevelsApi(client, "http://10.0.2.2:8080") }
+    val chooseLevelApi = remember { ChooseLevelApi(client, "http://10.0.2.2:8080") }
 
     var levels by remember { mutableStateOf<List<Level>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(topicId) {
         try {
-            levels = levelsApi.getLevelsForTopic(topicId).sortedBy { it.sort }
+            levels = chooseLevelApi.getLevelsForTopic(topicId).sortedBy { it.sort }
         } catch (e: Throwable) {
             error = e.message ?: "Ошибка подключения к серверу"
         }
@@ -46,7 +46,7 @@ fun LevelScreen(
             .background(AppColors.BackgroundBlack)
     ) {
 
-        // TOP BAR (как в LearningDeepScreen)
+        // TOP BAR
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -96,14 +96,28 @@ fun LevelScreen(
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     items(levels) { level ->
-                        Box(
+                        val (label, color) = when (level.difficulty) {
+                            null -> "Theory" to AppColors.TextLightGray
+                            1 -> "Easy" to AppColors.DifficultyEasy
+                            2 -> "Medium" to AppColors.DifficultyMedium
+                            3 -> "Hard" to AppColors.DifficultyHard
+                            else -> "Unknown" to AppColors.TextLightGray
+                        }
+
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(60.dp)
+                                .height(80.dp)
                                 .clickable { onLevelClick(level) }
                                 .padding(start = 12.dp),
-                            contentAlignment = Alignment.CenterStart
+                            verticalArrangement = Arrangement.Center
                         ) {
+                            Text(
+                                text = label,
+                                color = color,
+                                fontSize = 25.sp
+                            )
+
                             Text(
                                 text = level.name,
                                 color = AppColors.TextWhite,

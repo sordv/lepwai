@@ -14,13 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lepwai.network.TopicsApi
+import com.example.lepwai.network.ChooseTopicApi
 import com.example.lepwai.network.Topic
 import com.example.lepwai.network.createHttpClient
 import com.example.lepwai.theme.AppColors
 
 @Composable
-fun LearningDeepScreen(
+fun ChooseTopic(
     courseId: Int,
     courseName: String,
     onBack: () -> Unit = {}
@@ -29,7 +29,7 @@ fun LearningDeepScreen(
     var selectedTopic by remember { mutableStateOf<Topic?>(null) }
 
     selectedTopic?.let { topic ->
-        LevelScreen(
+        ChooseLevel(
             topicId = topic.id,
             topicName = topic.name,
             onBack = { selectedTopic = null }
@@ -38,14 +38,14 @@ fun LearningDeepScreen(
     }
 
     val client = remember { createHttpClient() }
-    val topicsApi = remember { TopicsApi(client, "http://10.0.2.2:8080") }
+    val chooseTopicApi = remember { ChooseTopicApi(client, "http://10.0.2.2:8080") }
 
     var topics by remember { mutableStateOf<List<Topic>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(courseId) {
         try {
-            topics = topicsApi.getTopicsForCourse(courseId).sortedBy { it.sort }
+            topics = chooseTopicApi.getTopicsForCourse(courseId).sortedBy { it.sort }
         } catch (e: Throwable) {
             error = e.message ?: "Ошибка подключения к серверу"
         }

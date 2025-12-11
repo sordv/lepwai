@@ -55,6 +55,7 @@ object Levels : Table("levels") {
     val parent = integer("parent")
     val value = text("value")
     val answer = text("answer").nullable()
+    val difficulty = integer("difficulty").nullable()
     override val primaryKey = PrimaryKey(id)
 }
 
@@ -83,7 +84,7 @@ data class CourseDTO(val id: Int, val name: String, val sort: Int)
 data class TopicDTO(val id: Int, val name: String, val sort: Int, val parent: Int)
 
 @kotlinx.serialization.Serializable
-data class LevelDTO(val id: Int, val name: String, val sort: Int, val parent: Int, val value: String, val answer: String?)
+data class LevelDTO(val id: Int, val name: String, val sort: Int, val parent: Int, val value: String, val answer: String?, val difficulty: Int?)
 
 fun hikariDataSource(
     host: String,
@@ -312,7 +313,8 @@ fun main() {
                                     sort = row[Levels.sort],
                                     parent = row[Levels.parent],
                                     value = row[Levels.value],
-                                    answer = row[Levels.answer]
+                                    answer = row[Levels.answer],
+                                    difficulty = row[Levels.difficulty]
                                 )
                             }
                     }

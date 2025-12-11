@@ -11,18 +11,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lepwai.network.CoursesApi
+import com.example.lepwai.network.ChooseCourseApi
 import com.example.lepwai.network.Course
 import com.example.lepwai.network.createHttpClient
 import com.example.lepwai.theme.AppColors
 
 @Composable
-fun LearningScreen() {
+fun ChooseCourse() {
 
     var selectedCourse by remember { mutableStateOf<Course?>(null) }
 
     selectedCourse?.let { course ->
-        LearningDeepScreen(
+        ChooseTopic(
             courseId = course.id,
             courseName = course.name,
             onBack = { selectedCourse = null }
@@ -31,14 +31,14 @@ fun LearningScreen() {
     }
 
     val client = remember { createHttpClient() }
-    val coursesApi = remember { CoursesApi(client, "http://10.0.2.2:8080") }
+    val chooseCourseApi = remember { ChooseCourseApi(client, "http://10.0.2.2:8080") }
 
     var courses by remember { mutableStateOf<List<Course>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         try {
-            courses = coursesApi.getCourses()
+            courses = chooseCourseApi.getCourses()
         } catch (e: Throwable) {
             error = e.message ?: "Ошибка подключения к серверу"
         }
