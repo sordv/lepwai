@@ -15,7 +15,6 @@ import com.example.lepwai.network.CoursesApi
 import com.example.lepwai.network.Course
 import com.example.lepwai.network.createHttpClient
 import com.example.lepwai.theme.AppColors
-import kotlinx.coroutines.launch
 
 @Composable
 fun LearningScreen() {
@@ -31,6 +30,20 @@ fun LearningScreen() {
         return
     }
 
+    val client = remember { createHttpClient() }
+    val coursesApi = remember { CoursesApi(client, "http://10.0.2.2:8080") }
+
+    var courses by remember { mutableStateOf<List<Course>>(emptyList()) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        try {
+            courses = coursesApi.getCourses()
+        } catch (e: Throwable) {
+            error = e.message ?: "Ошибка подключения к серверу"
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -41,9 +54,8 @@ fun LearningScreen() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(AppColors.BackgroundBlack)
                 .background(AppColors.DifficultyEasy) //TODO: UBRAT POTOM
-                .padding(25.dp),
+                .padding(15.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -59,45 +71,20 @@ fun LearningScreen() {
         }
         // END TOP BAR
 
-        var courses by remember { mutableStateOf<List<Course>>(emptyList()) }
-        var loading by remember { mutableStateOf(true) }
-        var error by remember { mutableStateOf<String?>(null) }
-        var showLoading by remember { mutableStateOf(false) }
-        var showError by remember { mutableStateOf(false) }
-
-        val client = remember { createHttpClient() }
-        val baseUrl = "http://10.0.2.2:8080"
-        val coursesApi = remember { CoursesApi(client, baseUrl) }
-
-        LaunchedEffect(Unit) {
-            val loadingJob = launch {
-                kotlinx.coroutines.delay(2000)
-                if (loading) showLoading = true
-            }
-
-            try {
-                courses = coursesApi.getCourses()
-            } catch (t: Throwable) {
-                error = t.message ?: "Ошибка при загрузке курсов"
-                launch {
-                    kotlinx.coroutines.delay(2000)
-                    if (error != null && courses.isEmpty()) showError = true
-                }
-            } finally {
-                loading = false
-                showLoading = false
-            }
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             when {
-                courses.isNotEmpty() -> {
+                error != null -> Text(
+                    text = "Ошибка: $error",
+                    color = AppColors.ErrorRed,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+
+                courses.isNotEmpty() ->
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(vertical = 28.dp),
@@ -120,13 +107,6 @@ fun LearningScreen() {
                             }
                         }
                     }
-                }
-
-                showLoading ->
-                    Text("Загрузка...", color = AppColors.TextWhite, modifier = Modifier.padding(top = 8.dp))
-
-                showError ->
-                    Text("Ошибка: $error", color = AppColors.ErrorRed, modifier = Modifier.padding(top = 8.dp))
             }
         }
     }

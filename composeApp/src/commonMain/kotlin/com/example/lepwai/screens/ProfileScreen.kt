@@ -37,7 +37,7 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(AppColors.DifficultyEasy) //TODO: UBRAT POTOM
-                .padding(25.dp),
+                .padding(15.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -51,6 +51,7 @@ fun ProfileScreen(
             Box(
                 modifier = Modifier
                     .size(65.dp)
+                    .background(AppColors.DifficultyMedium) // TODO убрать
                     .clickable {
                         scope.launch {
                             settingsRepo.saveCurrentLogin(null)

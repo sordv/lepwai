@@ -48,6 +48,16 @@ object Topics : Table("topics") {
     override val primaryKey = PrimaryKey(id)
 }
 
+object Levels : Table("levels") {
+    val id = integer("id")
+    val name = varchar("name", 60)
+    val sort = integer("sort")
+    val parent = integer("parent")
+    val value = text("value")
+    val answer = text("answer").nullable()
+    override val primaryKey = PrimaryKey(id)
+}
+
 @Serializable
 data class Health(val status: String, val ts: String)
 
@@ -71,6 +81,9 @@ data class CourseDTO(val id: Int, val name: String, val sort: Int)
 
 @kotlinx.serialization.Serializable
 data class TopicDTO(val id: Int, val name: String, val sort: Int, val parent: Int)
+
+@kotlinx.serialization.Serializable
+data class LevelDTO(val id: Int, val name: String, val sort: Int, val parent: Int, val value: String, val answer: String?)
 
 fun hikariDataSource(
     host: String,
@@ -268,6 +281,42 @@ fun main() {
                             }
                     }
                     call.respond(topics)
+                } catch (t: Throwable) {
+                    call.respond(
+                        HttpStatusCode.InternalServerError,
+                        mapOf("error" to (t.message ?: "unknown"))
+                    )
+                }
+            }
+
+            get("/topics/{topicId}/levels") {
+                if (db == null) {
+                    call.respond(HttpStatusCode.InternalServerError, "DB connection missing")
+                    return@get
+                }
+
+                val topicId = call.parameters["topicId"]?.toIntOrNull()
+                if (topicId == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Bad topicId")
+                    return@get
+                }
+
+                try {
+                    val levels = transaction(db) {
+                        Levels.select { Levels.parent eq topicId }
+                            .orderBy(Levels.sort to SortOrder.ASC)
+                            .map { row ->
+                                LevelDTO(
+                                    id = row[Levels.id],
+                                    name = row[Levels.name],
+                                    sort = row[Levels.sort],
+                                    parent = row[Levels.parent],
+                                    value = row[Levels.value],
+                                    answer = row[Levels.answer]
+                                )
+                            }
+                    }
+                    call.respond(levels)
                 } catch (t: Throwable) {
                     call.respond(
                         HttpStatusCode.InternalServerError,
