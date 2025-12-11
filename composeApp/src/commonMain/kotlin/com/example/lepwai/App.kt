@@ -114,7 +114,7 @@ fun App(settingsRepo: SettingsRepo) {
                     .fillMaxSize()
             ) {
                 when (selectedScreen) {
-                    "learning" -> ChooseCourse()
+                    "learning" -> ChooseCourseScreen()
                     "chat" -> ChatScreen()
                     "profile" -> ProfileScreen(
                         settingsRepo = settingsRepo,

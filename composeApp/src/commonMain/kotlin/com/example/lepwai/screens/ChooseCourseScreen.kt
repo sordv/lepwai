@@ -17,12 +17,12 @@ import com.example.lepwai.network.createHttpClient
 import com.example.lepwai.theme.AppColors
 
 @Composable
-fun ChooseCourse() {
+fun ChooseCourseScreen() {
 
     var selectedCourse by remember { mutableStateOf<Course?>(null) }
 
     selectedCourse?.let { course ->
-        ChooseTopic(
+        ChooseTopicScreen(
             courseId = course.id,
             courseName = course.name,
             onBack = { selectedCourse = null }

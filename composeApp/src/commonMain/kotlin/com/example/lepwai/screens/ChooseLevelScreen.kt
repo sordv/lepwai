@@ -14,38 +14,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lepwai.network.ChooseTopicApi
-import com.example.lepwai.network.Topic
+import com.example.lepwai.network.Level
+import com.example.lepwai.network.ChooseLevelApi
 import com.example.lepwai.network.createHttpClient
 import com.example.lepwai.theme.AppColors
 
 @Composable
-fun ChooseTopic(
-    courseId: Int,
-    courseName: String,
+fun ChooseLevelScreen(
+    topicId: Int,
+    topicName: String,
+    onLevelClick: (Level) -> Unit = {},
     onBack: () -> Unit = {}
 ) {
-
-    var selectedTopic by remember { mutableStateOf<Topic?>(null) }
-
-    selectedTopic?.let { topic ->
-        ChooseLevel(
-            topicId = topic.id,
-            topicName = topic.name,
-            onBack = { selectedTopic = null }
-        )
-        return
-    }
-
     val client = remember { createHttpClient() }
-    val chooseTopicApi = remember { ChooseTopicApi(client, "http://10.0.2.2:8080") }
+    val chooseLevelApi = remember { ChooseLevelApi(client, "http://10.0.2.2:8080") }
 
-    var topics by remember { mutableStateOf<List<Topic>>(emptyList()) }
+    var levels by remember { mutableStateOf<List<Level>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(courseId) {
+    LaunchedEffect(topicId) {
         try {
-            topics = chooseTopicApi.getTopicsForCourse(courseId).sortedBy { it.sort }
+            levels = chooseLevelApi.getLevelsForTopic(topicId).sortedBy { it.sort }
         } catch (e: Throwable) {
             error = e.message ?: "Ошибка подключения к серверу"
         }
@@ -56,11 +45,12 @@ fun ChooseTopic(
             .fillMaxSize()
             .background(AppColors.BackgroundBlack)
     ) {
+
         // TOP BAR
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(AppColors.DifficultyEasy) // TODO убрать
+                .background(AppColors.DifficultyEasy) //TODO: UBRAT POTOM
                 .padding(15.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -81,7 +71,7 @@ fun ChooseTopic(
             }
 
             Text(
-                text = courseName,
+                text = topicName,
                 color = AppColors.TextWhite,
                 fontSize = 36.sp
             )
@@ -97,7 +87,7 @@ fun ChooseTopic(
                 modifier = Modifier.padding(16.dp)
             )
 
-            topics.isNotEmpty() ->
+            levels.isNotEmpty() ->
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -105,17 +95,31 @@ fun ChooseTopic(
                     contentPadding = PaddingValues(vertical = 28.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    items(topics) { topic ->
-                        Box(
+                    items(levels) { level ->
+                        val (label, color) = when (level.difficulty) {
+                            null -> "Theory" to AppColors.TextLightGray
+                            1 -> "Easy" to AppColors.DifficultyEasy
+                            2 -> "Medium" to AppColors.DifficultyMedium
+                            3 -> "Hard" to AppColors.DifficultyHard
+                            else -> "Unknown" to AppColors.TextLightGray
+                        }
+
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(60.dp)
-                                .clickable { selectedTopic = topic }
+                                .height(80.dp)
+                                .clickable { onLevelClick(level) }
                                 .padding(start = 12.dp),
-                            contentAlignment = Alignment.CenterStart
+                            verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = topic.name,
+                                text = label,
+                                color = color,
+                                fontSize = 25.sp
+                            )
+
+                            Text(
+                                text = level.name,
                                 color = AppColors.TextWhite,
                                 fontSize = 32.sp
                             )
