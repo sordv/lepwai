@@ -12,4 +12,8 @@ class ChooseLevelApi(private val client: HttpClient, private val baseUrl: String
     suspend fun getLevelsForTopic(topicId: Int): List<Level> {
         return client.get("$baseUrl/topics/$topicId/levels").body()
     }
+
+    suspend fun getLevelById(levelId: Int): Level {
+        return client.get("$baseUrl/levels/$levelId").body()
+    }
 }

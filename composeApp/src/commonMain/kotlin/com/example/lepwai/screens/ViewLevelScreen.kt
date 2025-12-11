@@ -3,8 +3,8 @@ package com.example.lepwai.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -14,31 +14,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lepwai.data.LearningNavigationState
-import com.example.lepwai.network.ChooseTopicApi
-import com.example.lepwai.network.Topic
+import com.example.lepwai.network.Level
+import com.example.lepwai.network.ChooseLevelApi
 import com.example.lepwai.network.createHttpClient
 import com.example.lepwai.theme.AppColors
 
 @Composable
-fun ChooseTopicScreen(
-    courseId: Int,
-    courseName: String,
-    onBack: () -> Unit = {},
-    onSelectTopic: (Int, String) -> Unit = { _, _ -> }
+fun ViewLevelScreen(
+    levelId: Int,
+    levelName: String,
+    onBack: () -> Unit = {}
 ) {
-
     val client = remember { createHttpClient() }
-    val chooseTopicApi = remember { ChooseTopicApi(client, "http://10.0.2.2:8080") }
+    val chooseLevelApi = remember { ChooseLevelApi(client, "http://10.0.2.2:8080") }
 
-    var topics by remember { mutableStateOf<List<Topic>>(emptyList()) }
+    var level by remember { mutableStateOf<Level?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(courseId) {
+    LaunchedEffect(levelId) {
         try {
-            topics = chooseTopicApi.getTopicsForCourse(courseId).sortedBy { it.sort }
+            level = chooseLevelApi.getLevelById(levelId)
+            error = null
         } catch (e: Throwable) {
-            error = e.message ?: "Ошибка подключения к серверу"
+            error = e.message ?: "Ошибка при загрузке уровня"
         }
     }
 
@@ -51,7 +49,7 @@ fun ChooseTopicScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(AppColors.DifficultyEasy) // TODO убрать
+                .background(AppColors.DifficultyEasy) //TODO: UBRAT POTOM
                 .padding(15.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -72,7 +70,7 @@ fun ChooseTopicScreen(
             }
 
             Text(
-                text = courseName,
+                text = levelName,
                 color = AppColors.TextWhite,
                 fontSize = 36.sp
             )
@@ -88,30 +86,24 @@ fun ChooseTopicScreen(
                 modifier = Modifier.padding(16.dp)
             )
 
-            topics.isNotEmpty() ->
-                LazyColumn(
+            level == null -> {
+                // пусто — не показываем текст "Загрузка..."
+            }
+
+            else ->
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    contentPadding = PaddingValues(vertical = 28.dp),
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 28.dp, bottom = 28.dp)
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    items(topics) { topic ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(60.dp)
-                                .clickable { onSelectTopic(topic.id, topic.name) }
-                                .padding(start = 12.dp),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            Text(
-                                text = topic.name,
-                                color = AppColors.TextWhite,
-                                fontSize = 32.sp
-                            )
-                        }
-                    }
+                    Text(
+                        text = level!!.value,
+                        color = AppColors.TextWhite,
+                        fontSize = 27.sp
+                    )
                 }
         }
     }

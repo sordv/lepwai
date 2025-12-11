@@ -326,6 +326,50 @@ fun main() {
                     )
                 }
             }
+
+            get("/levels/{levelId}") {
+                if (db == null) {
+                    call.respond(HttpStatusCode.InternalServerError, "DB connection missing")
+                    return@get
+                }
+
+                val levelId = call.parameters["levelId"]?.toIntOrNull()
+                if (levelId == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Bad levelId")
+                    return@get
+                }
+
+                try {
+                    val level = transaction(db) {
+                        Levels.select { Levels.id eq levelId }
+                            .limit(1)
+                            .map { row ->
+                                LevelDTO(
+                                    id = row[Levels.id],
+                                    name = row[Levels.name],
+                                    sort = row[Levels.sort],
+                                    parent = row[Levels.parent],
+                                    value = row[Levels.value],
+                                    answer = row[Levels.answer],
+                                    difficulty = row[Levels.difficulty]
+                                )
+                            }
+                            .firstOrNull()
+                    }
+
+                    if (level == null) {
+                        call.respond(HttpStatusCode.NotFound, "Level not found")
+                    } else {
+                        call.respond(level)
+                    }
+                } catch (t: Throwable) {
+                    call.respond(
+                        HttpStatusCode.InternalServerError,
+                        mapOf("error" to (t.message ?: "unknown"))
+                    )
+                }
+            }
+
         }
     }.start(wait = true)
 }

@@ -17,18 +17,9 @@ import com.example.lepwai.network.createHttpClient
 import com.example.lepwai.theme.AppColors
 
 @Composable
-fun ChooseCourseScreen() {
-
-    var selectedCourse by remember { mutableStateOf<Course?>(null) }
-
-    selectedCourse?.let { course ->
-        ChooseTopicScreen(
-            courseId = course.id,
-            courseName = course.name,
-            onBack = { selectedCourse = null }
-        )
-        return
-    }
+fun ChooseCourseScreen(
+    onSelectCourse: (Int, String) -> Unit = { _, _ -> }
+) {
 
     val client = remember { createHttpClient() }
     val chooseCourseApi = remember { ChooseCourseApi(client, "http://10.0.2.2:8080") }
@@ -95,7 +86,7 @@ fun ChooseCourseScreen() {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(60.dp)
-                                    .clickable { selectedCourse = course }
+                                    .clickable { onSelectCourse(course.id, course.name) }
                                     .padding(start = 12.dp),
                                 contentAlignment = Alignment.CenterStart
                             ) {

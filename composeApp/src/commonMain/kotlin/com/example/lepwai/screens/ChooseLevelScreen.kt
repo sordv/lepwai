@@ -23,9 +23,10 @@ import com.example.lepwai.theme.AppColors
 fun ChooseLevelScreen(
     topicId: Int,
     topicName: String,
-    onLevelClick: (Level) -> Unit = {},
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onSelectLevel: (Int, String) -> Unit = { _, _ -> }
 ) {
+
     val client = remember { createHttpClient() }
     val chooseLevelApi = remember { ChooseLevelApi(client, "http://10.0.2.2:8080") }
 
@@ -108,7 +109,7 @@ fun ChooseLevelScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(80.dp)
-                                .clickable { onLevelClick(level) }
+                                .clickable { onSelectLevel(level.id, level.name) }
                                 .padding(start = 12.dp),
                             verticalArrangement = Arrangement.Center
                         ) {

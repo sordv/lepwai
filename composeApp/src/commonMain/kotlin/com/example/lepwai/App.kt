@@ -26,11 +26,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import com.example.lepwai.screens.ChatScreen
-import com.example.lepwai.screens.*
+import com.example.lepwai.screens.ProfileScreen
+import com.example.lepwai.screens.LearningRootScreen
 import com.example.lepwai.theme.AppColors
+import com.example.lepwai.data.LearningNavigationState
 import com.example.lepwai.data.SettingsRepo
 import com.example.lepwai.network.AuthApi
 import com.example.lepwai.network.createHttpClient
+import com.example.lepwai.screens.LoginScreen
+import com.example.lepwai.screens.RegisterScreen
 import io.ktor.client.*
 
 @Composable
@@ -65,8 +69,11 @@ fun App(settingsRepo: SettingsRepo) {
         return
     }
 
-    // если выполнен вход
+    // if logged in
     var selectedScreen by remember { mutableStateOf("learning") }
+
+    // Learning navigation state (переходит в LearningRootScreen)
+    val learningState = remember { LearningNavigationState() }
 
     val screens = listOf(
         Screen("learning", "Обучение", Icons.Default.School),
@@ -84,7 +91,18 @@ fun App(settingsRepo: SettingsRepo) {
                     screens.forEach { screen ->
                         NavigationBarItem(
                             selected = selectedScreen == screen.route,
-                            onClick = { selectedScreen = screen.route },
+                            onClick = {
+                                if (selectedScreen == "learning" && screen.route == "learning") {
+                                    // пользователь уже в разделе "Обучение" — сбрасываем состояние и показываем список курсов
+                                    learningState.selectedCourseId = null
+                                    learningState.selectedCourseName = null
+                                    learningState.selectedTopicId = null
+                                    learningState.selectedTopicName = null
+                                    learningState.selectedLevelId = null
+                                    learningState.selectedLevelName = null
+                                }
+                                selectedScreen = screen.route
+                            },
                             icon = {
                                 Box(
                                     modifier = Modifier.fillMaxSize(),
@@ -114,7 +132,14 @@ fun App(settingsRepo: SettingsRepo) {
                     .fillMaxSize()
             ) {
                 when (selectedScreen) {
-                    "learning" -> ChooseCourseScreen()
+                    "learning" -> LearningRootScreen(
+                        learningState = learningState,
+                        onResetToCourses = {
+                            learningState.selectedCourseId = null
+                            learningState.selectedTopicId = null
+                            learningState.selectedLevelId = null
+                        }
+                    )
                     "chat" -> ChatScreen()
                     "profile" -> ProfileScreen(
                         settingsRepo = settingsRepo,
