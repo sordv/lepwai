@@ -51,7 +51,7 @@ fun ChooseTopicScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(AppColors.DifficultyEasy) // TODO убрать
+                //.background(AppColors.DifficultyEasy) // TODO убрать
                 .padding(15.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -59,7 +59,7 @@ fun ChooseTopicScreen(
             Box(
                 modifier = Modifier
                     .size(65.dp)
-                    .background(AppColors.DifficultyMedium) // TODO убрать
+                    //.background(AppColors.DifficultyMedium) // TODO убрать
                     .clickable { onBack() },
                 contentAlignment = Alignment.Center
             ) {

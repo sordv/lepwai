@@ -45,7 +45,7 @@ fun ChooseCourseScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(AppColors.DifficultyEasy) //TODO: UBRAT POTOM
+                //.background(AppColors.DifficultyEasy) //TODO: UBRAT POTOM
                 .padding(15.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically

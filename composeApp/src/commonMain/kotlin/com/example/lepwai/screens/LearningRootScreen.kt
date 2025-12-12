@@ -23,10 +23,8 @@ fun LearningRootScreen(
                 courseId = learningState.selectedCourseId!!,
                 courseName = learningState.selectedCourseName ?: "",
                 onBack = {
-                    // вернуться на выбор курса
                     learningState.selectedCourseId = null
                     learningState.selectedCourseName = null
-                    // также чистим нижележащие
                     learningState.selectedTopicId = null
                     learningState.selectedLevelId = null
                 },
@@ -42,7 +40,6 @@ fun LearningRootScreen(
                 topicId = learningState.selectedTopicId!!,
                 topicName = learningState.selectedTopicName ?: "",
                 onBack = {
-                    // вернуться на выбор темы
                     learningState.selectedTopicId = null
                     learningState.selectedTopicName = null
                     learningState.selectedLevelId = null
@@ -59,7 +56,6 @@ fun LearningRootScreen(
                 levelId = learningState.selectedLevelId!!,
                 levelName = learningState.selectedLevelName ?: "",
                 onBack = {
-                    // вернуться на список уровней
                     learningState.selectedLevelId = null
                     learningState.selectedLevelName = null
                 }
