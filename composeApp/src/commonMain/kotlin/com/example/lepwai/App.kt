@@ -140,7 +140,7 @@ fun App(settingsRepo: SettingsRepo) {
                             learningState.selectedLevelId = null
                         }
                     )
-                    "chat" -> ChatScreen()
+                    "chat" -> ChatScreen(settingsRepo = settingsRepo)
                     "profile" -> ProfileScreen(
                         settingsRepo = settingsRepo,
                         onLogout = {

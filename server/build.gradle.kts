@@ -46,6 +46,12 @@ dependencies {
 
     // Hash
     implementation("at.favre.lib:bcrypt:0.9.0")
+
+    // KTOR CLIENT (для GigaChat)
+    implementation("io.ktor:ktor-client-core-jvm:${ktorVersion}")
+    implementation("io.ktor:ktor-client-cio-jvm:${ktorVersion}")
+    implementation("io.ktor:ktor-client-content-negotiation-jvm:${ktorVersion}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:${ktorVersion}")
 }
 
 tasks.withType<KotlinCompile> {
