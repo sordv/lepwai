@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../theme/styles.css">
 </head>
 <body>
-<h1>Программирование на Python: Операторы, вычисления и операции над строками</h1>
+<h1>Операторы, вычисления и операции над строками</h1>
 
 <p>Операторы — это специальные символы или ключевые слова, которые выполняют операции над переменными и значениями. В Python есть операторы для работы с числами, строками, сравнения и логические операторы.</p>
 
@@ -59,13 +59,13 @@
     <div class="code-line">age = <span class="number">25</span></div>
     <div class="code-line">has_license = <span class="keyword">True</span></div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># and (И) - истинно, если оба условия истинны</span></div>
+    <div class="code-line"><span class="comment"># and (И) - истинно, если оба условия истинны</span></div>
     <div class="code-line">can_drive = (age >= <span class="number">18</span>) <span class="keyword">and</span> has_license  <span class="comment"># True</span></div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># or (ИЛИ) - истинно, если хотя бы одно условие истинно</span></div>
+    <div class="code-line"><span class="comment"># or (ИЛИ) - истинно, если хотя бы одно условие истинно</span></div>
     <div class="code-line">has_discount = (age < <span class="number">18</span>) <span class="keyword">or</span> (age >= <span class="number">65</span>)  <span class="comment"># False</span></div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># not (НЕ) - инвертирует значение</span></div>
+    <div class="code-line"><span class="comment"># not (НЕ) - инвертирует значение</span></div>
     <div class="code-line">cannot_drive = <span class="keyword">not</span> can_drive  <span class="comment"># False</span></div>
 </div>
 
@@ -76,7 +76,7 @@
         <div class="code-line">has_id = <span class="keyword">True</span></div>
         <div class="code-line">is_vip = <span class="keyword">False</span></div>
         <div class="code-line"></div>
-        <div class="code-line"><span class="keyword"># Можно войти, если возраст >= 18 И есть ID ИЛИ если VIP</span></div>
+        <div class="code-line"><span class="comment"># Можно войти, если возраст >= 18 И есть ID ИЛИ если VIP</span></div>
         <div class="code-line">can_enter = (age >= <span class="number">18</span> <span class="keyword">and</span> has_id) <span class="keyword">or</span> is_vip</div>
         <div class="code-line"><span class="keyword">print</span>(<span class="string">"Можно войти?"</span>, can_enter)  <span class="comment"># True</span></div>
     </div>
@@ -126,11 +126,11 @@
     <div class="code-line">age = <span class="number">25</span></div>
     <div class="code-line">height = <span class="number">1.65</span></div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># f-строки (рекомендуемый способ)</span></div>
+    <div class="code-line"><span class="comment"># f-строки (рекомендуемый способ)</span></div>
     <div class="code-line">message = <span class="string">f"Меня зовут {name}, мне {age} лет, мой рост {height:.2f} м"</span></div>
     <div class="code-line"><span class="keyword">print</span>(message)  <span class="comment"># "Меня зовут Анна, мне 25 лет, мой рост 1.65 м"</span></div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># Метод format()</span></div>
+    <div class="code-line"><span class="comment"># Метод format()</span></div>
     <div class="code-line">message2 = <span class="string">"Меня зовут {}, мне {} лет"</span>.<span class="keyword">format</span>(name, age)</div>
     <div class="code-line"><span class="keyword">print</span>(message2)  <span class="comment"># "Меня зовут Анна, мне 25 лет"</span></div>
 </div>
@@ -152,7 +152,7 @@
     <div class="code-line">result = <span class="number">5</span> + <span class="number">3</span> * <span class="number">2</span> ** <span class="number">2</span>  <span class="comment"># Сначала 2**2=4, потом 3*4=12, потом 5+12=17</span></div>
     <div class="code-line"><span class="keyword">print</span>(result)  <span class="comment"># 17</span></div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># Используйте скобки для изменения порядка</span></div>
+    <div class="code-line"><span class="comment"># Используйте скобки для изменения порядка</span></div>
     <div class="code-line">result2 = (<span class="number">5</span> + <span class="number">3</span>) * <span class="number">2</span> ** <span class="number">2</span>  <span class="comment"># Сначала 5+3=8, потом 2**2=4, потом 8*4=32</span></div>
     <div class="code-line"><span class="keyword">print</span>(result2)  <span class="comment"># 32</span></div>
 </div>

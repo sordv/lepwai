@@ -11,27 +11,47 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lepwai.network.ChooseCourseApi
-import com.example.lepwai.network.Course
-import com.example.lepwai.network.createHttpClient
+import com.example.lepwai.network.*
 import com.example.lepwai.theme.AppColors
 
 @Composable
 fun ChooseCourseScreen(
+    userLogin: String,
     onSelectCourse: (Int, String) -> Unit = { _, _ -> }
 ) {
 
     val client = remember { createHttpClient() }
-    val chooseCourseApi = remember { ChooseCourseApi(client, "http://10.0.2.2:8080") }
+    val courseApi = remember { ChooseCourseApi(client, "http://10.0.2.2:8080") }
+    val topicApi = remember { ChooseTopicApi(client, "http://10.0.2.2:8080") }
+    val levelApi = remember { ChooseLevelApi(client, "http://10.0.2.2:8080") }
 
     var courses by remember { mutableStateOf<List<Course>>(emptyList()) }
+    var completedLevels by remember { mutableStateOf<Set<Int>>(emptySet()) }
+    var courseLevels by remember { mutableStateOf<Map<Int, List<Int>>>(emptyMap()) }
     var error by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         try {
-            courses = chooseCourseApi.getCourses()
+            courses = courseApi.getCourses()
+
+            completedLevels = levelApi
+                .getUserProgress(userLogin)
+                .filter { it.status == "done" }
+                .map { it.levelId }
+                .toSet()
+
+            courseLevels = courses.associate { course ->
+                val topics = topicApi.getTopicsForCourse(course.id)
+
+                val levels = topics.flatMap { topic ->
+                    levelApi.getLevelsForTopic(topic.id).map { it.id }
+                }
+
+                course.id to levels
+            }
+
         } catch (e: Throwable) {
-            error = e.message ?: "Ошибка подключения к серверу"
+            error = e.message ?: "Ошибка загрузки"
         }
     }
 
@@ -45,59 +65,68 @@ fun ChooseCourseScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                //.background(AppColors.DifficultyEasy) //TODO: UBRAT POTOM
                 .padding(15.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(modifier = Modifier.size(65.dp)) // заглушка
-
             Text(
                 text = "Курсы",
                 color = AppColors.TextWhite,
                 fontSize = 36.sp
             )
-
-            Box(modifier = Modifier.size(65.dp)) // заглушка
         }
-        // END TOP BAR
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            when {
-                error != null -> Text(
-                    text = "Ошибка: $error",
-                    color = AppColors.ErrorRed,
-                    modifier = Modifier.padding(top = 12.dp)
-                )
+        when {
+            error != null -> Text(
+                text = "Ошибка: $error",
+                color = AppColors.ErrorRed,
+                modifier = Modifier.padding(16.dp)
+            )
 
-                courses.isNotEmpty() ->
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(vertical = 28.dp),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
+            else -> LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(vertical = 28.dp),
+                verticalArrangement = Arrangement.spacedBy(22.dp)
+            ) {
+                items(courses) { course ->
+
+                    val levels = courseLevels[course.id] ?: emptyList()
+                    val done = levels.count { completedLevels.contains(it) }
+                    val total = levels.size
+                    val progress = if (total == 0) 0f else done.toFloat() / total
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelectCourse(course.id, course.name) }
                     ) {
-                        items(courses) { course ->
+
+                        Text(
+                            text = course.name,
+                            color = AppColors.TextWhite,
+                            fontSize = 32.sp
+                        )
+
+                        Spacer(Modifier.height(6.dp))
+
+                        // ПРОГРЕСС-БАР
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(6.dp)
+                                .background(AppColors.BackGroundMediumGray)
+                        ) {
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(60.dp)
-                                    .clickable { onSelectCourse(course.id, course.name) }
-                                    .padding(start = 12.dp),
-                                contentAlignment = Alignment.CenterStart
-                            ) {
-                                Text(
-                                    text = course.name,
-                                    color = AppColors.TextWhite,
-                                    fontSize = 32.sp
-                                )
-                            }
+                                    .fillMaxWidth(progress)
+                                    .height(6.dp)
+                                    .background(AppColors.DoneGreen)
+                            )
                         }
                     }
+                }
             }
         }
     }

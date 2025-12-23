@@ -1,14 +1,13 @@
 package com.example.lepwai.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,8 +18,9 @@ import com.example.lepwai.network.Level
 import com.example.lepwai.network.createHttpClient
 import com.example.lepwai.theme.AppColors
 import com.example.lepwai.ui.HtmlView
-import androidx.compose.foundation.clickable
 import kotlinx.coroutines.launch
+
+enum class RunState { None, CompileError, WrongAnswer, Success }
 
 @Composable
 fun ViewLevelScreen(
@@ -29,25 +29,32 @@ fun ViewLevelScreen(
     levelName: String,
     onBack: () -> Unit = {}
 ) {
-
     val client = remember { createHttpClient() }
     val api = remember { ChooseLevelApi(client, "http://10.0.2.2:8080") }
     val scope = rememberCoroutineScope()
 
     var level by remember { mutableStateOf<Level?>(null) }
     var completed by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var savedAnswer by remember { mutableStateOf<String?>(null) }
+
+    var userCode by remember { mutableStateOf("") }
+    var output by remember { mutableStateOf<String?>(null) }
+    var runState by remember { mutableStateOf(RunState.None) }
+
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(levelId) {
-        try {
-            level = api.getLevelById(levelId)
+        level = api.getLevelById(levelId)
 
-            completed = api
-                .getUserProgress(userLogin)
-                .any { it.levelId == levelId && it.status == "done" }
+        val progress = api.getUserProgress(userLogin)
+            .firstOrNull { it.levelId == levelId }
 
-        } catch (e: Throwable) {
-            error = e.message
+        completed = progress?.status == "done"
+        savedAnswer = progress?.answer
+
+        if (completed) {
+            runState = RunState.Success
+            userCode = savedAnswer ?: ""
         }
     }
 
@@ -57,7 +64,7 @@ fun ViewLevelScreen(
             .background(AppColors.BackgroundBlack)
     ) {
 
-        // TOP BAR
+        // ===== TOP BAR =====
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -65,73 +72,189 @@ fun ViewLevelScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            Box(
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Назад",
+                tint = AppColors.ButtonGray,
                 modifier = Modifier
-                    .size(65.dp)
-                    .clickable { onBack() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Назад",
-                    tint = AppColors.ButtonGray,
-                    modifier = Modifier.size(45.dp)
-                )
-            }
+                    .size(45.dp)
+                    .clickable { onBack() }
+            )
 
             Text(
                 text = levelName,
                 color = AppColors.TextWhite,
-                fontSize = 36.sp
+                fontSize = 32.sp
             )
 
-            Box(modifier = Modifier.size(65.dp))
+            Spacer(Modifier.size(45.dp))
         }
 
-        when {
-            error != null -> Text(
-                text = "Ошибка: $error",
-                color = AppColors.ErrorRed,
-                modifier = Modifier.padding(16.dp)
-            )
+        level?.let { lvl ->
 
-            level != null -> Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+            // ================== ТЕОРИЯ ==================
+            if (lvl.difficulty == null) {
 
-                HtmlView(
-                    htmlFileName = levelId.toString(),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    HtmlView(htmlFileName = levelId.toString())
+                }
 
-                // ФЛАЖОК — ТОЛЬКО ДЛЯ ТЕОРИИ
-                if (level!!.difficulty == null) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = completed,
-                            enabled = !completed,
-                            onCheckedChange = {
+                if (!completed) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Button(
+                            onClick = {
                                 scope.launch {
-                                    api.completeLevel(
-                                        login = userLogin,
-                                        levelId = levelId
-                                    )
+                                    api.completeLevel(userLogin, levelId)
                                     completed = true
                                 }
-                            }
-                        )
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = AppColors.DoneGreen
+                            ),
+                            modifier = Modifier
+                                .height(52.dp)
+                                .fillMaxWidth(0.8f)
+                        ) {
+                            Text(
+                                text = "Закончить",
+                                color = AppColors.TextWhite,
+                                fontSize = 20.sp
+                            )
+                        }
+                    }
+                }
+            }
 
-                        Spacer(Modifier.width(8.dp))
+            // ================== ПРАКТИКА ==================
+            else {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(scrollState)
+                        .padding(20.dp)
+                ) {
+                    Text(
+                        text = lvl.value,
+                        color = AppColors.TextLightGray,
+                        fontSize = 22.sp
+                    )
 
-                        Text(
-                            text = if (completed) "Пройдено" else "Отметить как пройдено",
+                    Spacer(Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = userCode,
+                        onValueChange = {
+                            userCode = it
+                            runState = RunState.None
+                        },
+                        enabled = !completed,
+                        textStyle = LocalTextStyle.current.copy(
                             color = AppColors.TextWhite,
-                            fontSize = 18.sp
+                            fontSize = 20.sp
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = AppColors.BackGroundMediumGray,
+                            unfocusedContainerColor = AppColors.BackGroundMediumGray,
+                            cursorColor = AppColors.MainBlue,
+                            focusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
+                            unfocusedBorderColor = androidx.compose.ui.graphics.Color.Transparent
+                        )
+                    )
+
+                    Spacer(Modifier.height(12.dp))
+
+                    if (runState != RunState.None) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(36.dp)
+                                .background(
+                                    when (runState) {
+                                        RunState.Success -> AppColors.DoneGreen
+                                        RunState.WrongAnswer -> AppColors.ErrorRed
+                                        RunState.CompileError -> AppColors.DifficultyMedium
+                                        else -> AppColors.DifficultyMedium
+                                    }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = when (runState) {
+                                    RunState.Success -> "Выполнено"
+                                    RunState.WrongAnswer -> "Не верно"
+                                    RunState.CompileError -> "Ошибка кода"
+                                    else -> ""
+                                },
+                                color = AppColors.TextWhite
+                            )
+                        }
+                    }
+
+                    output?.let {
+                        Spacer(Modifier.height(12.dp))
+                        Text("Результат:", color = AppColors.TextLightGray)
+                        Spacer(Modifier.height(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(AppColors.BackGroundMediumGray)
+                                .padding(12.dp)
+                        ) {
+                            Text(it, color = AppColors.TextLightGray)
+                        }
+                    }
+                }
+
+                // ===== КНОПКИ =====
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.QuestionAnswer,
+                        contentDescription = "Вопрос",
+                        tint = AppColors.ButtonGray,
+                        modifier = Modifier.size(65.dp)
+                    )
+
+                    if (!completed) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = "Запустить",
+                            tint = AppColors.MainBlue,
+                            modifier = Modifier
+                                .size(65.dp)
+                                .clickable {
+                                    scope.launch {
+                                        val result = api.runPractice(
+                                            login = userLogin,
+                                            levelId = levelId,
+                                            code = userCode
+                                        )
+
+                                        output = result.output
+                                        runState = when {
+                                            result.compileError -> RunState.CompileError
+                                            result.success -> RunState.Success
+                                            else -> RunState.WrongAnswer
+                                        }
+
+                                        if (result.success) completed = true
+                                    }
+                                }
                         )
                     }
                 }

@@ -12,6 +12,7 @@ fun LearningRootScreen(
     when {
         learningState.selectedCourseId == null -> {
             ChooseCourseScreen(
+                userLogin = userLogin,
                 onSelectCourse = { id, name ->
                     learningState.selectedCourseId = id
                     learningState.selectedCourseName = name
@@ -21,6 +22,7 @@ fun LearningRootScreen(
 
         learningState.selectedTopicId == null -> {
             ChooseTopicScreen(
+                userLogin = userLogin,
                 courseId = learningState.selectedCourseId!!,
                 courseName = learningState.selectedCourseName ?: "",
                 onBack = {

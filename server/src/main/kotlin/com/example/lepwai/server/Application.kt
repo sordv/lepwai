@@ -24,6 +24,7 @@ import io.ktor.client.request.*
 import io.ktor.client.call.*
 import io.ktor.client.statement.bodyAsText
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import java.io.File
 import javax.net.ssl.*
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
@@ -79,6 +80,7 @@ object UserLevelProgress : IntIdTable("user_level_progress") {
     val userLogin = varchar("user_login", 30)
     val levelId = integer("level_id")
     val status = varchar("status", 15)
+    val answer = text("answer").nullable()
 }
 
 @Serializable data class Health(val status: String, val ts: String)
@@ -93,7 +95,10 @@ object UserLevelProgress : IntIdTable("user_level_progress") {
 @kotlinx.serialization.Serializable data class TopicDTO(val id: Int, val name: String, val sort: Int, val parent: Int)
 @kotlinx.serialization.Serializable data class LevelDTO(val id: Int, val name: String, val sort: Int, val parent: Int, val value: String, val answer: String?, val difficulty: Int?)
 
-@Serializable data class LevelProgressDto(val levelId: Int, val status: String)
+@Serializable data class LevelProgressDto(val levelId: Int, val status: String, val answer: String? = null)
+@Serializable data class RunPracticeRequest(val login: String, val levelId: Int, val code: String)
+@Serializable data class RunPracticeResponse(val success: Boolean, val output: String, val compileError: Boolean)
+
 @Serializable data class CompleteLevelRequest(val login: String, val levelId: Int)
 @Serializable data class ChatDto(val id: Int, val title: String)
 @Serializable data class MessageDto(val id: Int, val isUserMsg: Boolean, val content: String)
@@ -531,7 +536,8 @@ fun main() {
                         .map {
                             LevelProgressDto(
                                 levelId = it[UserLevelProgress.levelId],
-                                status = it[UserLevelProgress.status]
+                                status = it[UserLevelProgress.status],
+                                answer = it[UserLevelProgress.answer]
                             )
                         }
                 }
@@ -546,18 +552,72 @@ fun main() {
                     val exists = UserLevelProgress.select {
                         (UserLevelProgress.userLogin eq req.login) and
                                 (UserLevelProgress.levelId eq req.levelId)
-                    }.count() > 0
+                    }.firstOrNull()
 
-                    if (!exists) {
+                    if (exists == null) {
                         UserLevelProgress.insert {
                             it[userLogin] = req.login
                             it[levelId] = req.levelId
                             it[status] = "done"
+                            it[answer] = null
                         }
                     }
                 }
 
                 call.respond(HttpStatusCode.OK)
+            }
+
+            post("/levels/run-practice") {
+                val req = call.receive<RunPracticeRequest>()
+
+                val level = transaction {
+                    Levels.select { Levels.id eq req.levelId }
+                        .firstOrNull()
+                } ?: run {
+                    call.respond(HttpStatusCode.NotFound)
+                    return@post
+                }
+
+                val expectedOutput = level[Levels.answer] ?: ""
+
+                val topic = transaction {
+                    Topics.select { Topics.id eq level[Levels.parent] }.first()
+                }
+
+                val course = transaction {
+                    Courses.select { Courses.id eq topic[Topics.parent] }.first()
+                }
+
+                val language = when (course[Courses.name].lowercase()) {
+                    "python" -> "python"
+                    "javascript" -> "javascript"
+                    else -> "python"
+                }
+
+                val (output, success, compileError) = runCode(
+                    code = req.code,
+                    language = language,
+                    expectedOutput = expectedOutput
+                )
+
+                if (success) {
+                    transaction {
+                        UserLevelProgress.insertIgnore {
+                            it[userLogin] = req.login
+                            it[levelId] = req.levelId
+                            it[status] = "done"
+                            it[answer] = req.code
+                        }
+                    }
+                }
+
+                call.respond(
+                    RunPracticeResponse(
+                        success = success,
+                        output = output,
+                        compileError = compileError
+                    )
+                )
             }
 
             get("/chat/list") {
@@ -679,4 +739,42 @@ fun main() {
 
         }
     }.start(wait = true)
+}
+
+fun runCode(
+code: String,
+language: String,
+expectedOutput: String
+): Triple<String, Boolean, Boolean> {
+
+    val file = when (language) {
+        "python" -> File.createTempFile("code", ".py")
+        "javascript" -> File.createTempFile("code", ".js")
+        else -> error("Unknown language")
+    }
+
+    file.writeText(code)
+
+    val process = try {
+        when (language) {
+            "python" -> ProcessBuilder("python", file.absolutePath)
+            "javascript" -> ProcessBuilder("node", file.absolutePath)
+            else -> error("Unknown language")
+        }
+            .redirectErrorStream(true)
+            .start()
+    } catch (e: Exception) {
+        file.delete()
+        return Triple(e.message ?: "Compilation error", false, true)
+    }
+
+    val output = process.inputStream.bufferedReader().readText().trim()
+    val exitCode = process.waitFor()
+
+    file.delete()
+
+    val compileError = exitCode != 0
+    val success = !compileError && output == expectedOutput.trim()
+
+    return Triple(output, success, compileError)
 }

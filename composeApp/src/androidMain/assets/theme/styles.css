@@ -9,7 +9,7 @@ body {
     color: #FAFAFA;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
-    padding: 40px;
+    padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -17,7 +17,7 @@ body {
 h1 {
     color: #5686FE;
     font-size: 2.5em;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     padding-bottom: 15px;
     border-bottom: 2px solid #5686FE;
 }
@@ -25,17 +25,16 @@ h1 {
 h2 {
     color: #5686FE;
     font-size: 1.8em;
-    margin: 35px 0 20px 0;
+    margin: 20px 0 20px 0;
 }
 
 h3 {
     color: #FAFAFA;
     font-size: 1.4em;
-    margin: 25px 0 15px 0;
+    margin: 15px 0 15px 0;
 }
 
 p {
-    margin-bottom: 20px;
     font-size: 1.1em;
 }
 
@@ -52,7 +51,7 @@ li {
 .code-block {
     background-color: #1B1B1C;
     border-left: 4px solid #5686FE;
-    padding: 20px;
+    padding: 15px;
     margin: 25px 0;
     border-radius: 0 8px 8px 0;
     overflow-x: auto;
@@ -93,14 +92,30 @@ li {
 
 .note {
     background-color: #2D2D30;
-    border-left: 4px solid #FFD700;
-    padding: 20px;
+    padding: 10px;
     margin: 25px 0;
-    border-radius: 0 8px 8px 0;
 }
 
 .highlight {
     background-color: #2D2D30;
     padding: 3px 6px;
     border-radius: 4px;
+}
+
+.image {
+    width: 100%;
+    max-width: 50vw;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.image2 {
+    width: 100%;
+    max-width: 95vw;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }

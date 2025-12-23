@@ -7,12 +7,14 @@
     <link rel="stylesheet" href="../theme/styles.css">
 </head>
 <body>
-<h1>Программирование на Python: Переменные</h1>
+<h1>Переменные</h1>
 
 <p>Переменные — это основа программирования. Представьте себе коробку, на которой написано имя, а внутри лежит какое-то значение. В Python переменные работают именно так: они хранят данные, которые можно использовать в программе.</p>
 
 <h2>Что такое переменная?</h2>
-<p>Переменная — это именованная область памяти, которая хранит данные. Когда вы создаёте переменную, вы резервируете место в памяти компьютера для хранения значения.</p>
+<p>Переменная — это именованная область памяти, которая хранит данные. Когда вы создаёте переменную, вы резервируете место в памяти компьютера для хранения значения. Часто переменную представдяют как некую коробку, например "message", которая хранит в себе какой-то предмет, например "Hello!".</p>
+
+<img class="image" src="../images/variable.jpg">
 
 <div class="note">
     <p><strong>Важно:</strong> В Python не нужно объявлять тип переменной заранее. Python сам определяет тип данных на основе присвоенного значения.</p>
@@ -24,7 +26,7 @@
 <p>Для создания переменной просто придумайте имя и используйте оператор <span class="highlight">=</span> (равно):</p>
 
 <div class="code-block">
-    <div class="code-line"><span class="keyword"># Создаём переменные</span></div>
+    <div class="code-line"><span class="comment"># Создаём переменные</span></div>
     <div class="code-line">age = <span class="number">25</span></div>
     <div class="code-line">name = <span class="string">"Анна"</span></div>
     <div class="code-line">temperature = <span class="number">36.6</span></div>
@@ -35,10 +37,10 @@
 <p>В Python можно создать несколько переменных одновременно:</p>
 
 <div class="code-block">
-    <div class="code-line"><span class="keyword"># Несколько переменных в одной строке</span></div>
+    <div class="code-line"><span class="comment"># Несколько переменных в одной строке</span></div>
     <div class="code-line">x, y, z = <span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span></div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># Присвоение одного значения нескольким переменным</span></div>
+    <div class="code-line"><span class="comment"># Присвоение одного значения нескольким переменным</span></div>
     <div class="code-line">a = b = c = <span class="number">100</span></div>
 </div>
 
@@ -72,16 +74,16 @@
 
 <h3>Использование в вычислениях</h3>
 <div class="code-block">
-    <div class="code-line"><span class="keyword"># Создаём переменные</span></div>
+    <div class="code-line"><span class="comment"># Создаём переменные</span></div>
     <div class="code-line">price = <span class="number">500</span></div>
     <div class="code-line">quantity = <span class="number">3</span></div>
     <div class="code-line">discount = <span class="number">0.1</span>  <span class="comment"># 10% скидка</span></div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># Вычисляем общую стоимость</span></div>
+    <div class="code-line"><span class="comment"># Вычисляем общую стоимость</span></div>
     <div class="code-line">total = price * quantity</div>
     <div class="code-line">total_with_discount = total - (total * discount)</div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># Выводим результат</span></div>
+    <div class="code-line"><span class="comment"># Выводим результат</span></div>
     <div class="code-line"><span class="keyword">print</span>(<span class="string">"Общая стоимость:"</span>, total)</div>
     <div class="code-line"><span class="keyword">print</span>(<span class="string">"Со скидкой:"</span>, total_with_discount)</div>
 </div>
@@ -92,10 +94,10 @@
     <div class="code-line">last_name = <span class="string">"Петров"</span></div>
     <div class="code-line">age = <span class="number">30</span></div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># Конкатенация (сложение) строк</span></div>
+    <div class="code-line"><span class="comment"># Конкатенация (сложение) строк</span></div>
     <div class="code-line">full_name = first_name + <span class="string">" "</span> + last_name</div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># Форматирование строк</span></div>
+    <div class="code-line"><span class="comment"># Форматирование строк</span></div>
     <div class="code-line">greeting = <span class="string">f"Привет, меня зовут {full_name} и мне {age} лет"</span></div>
     <div class="code-line"><span class="keyword">print</span>(greeting)</div>
 </div>
@@ -107,11 +109,11 @@
     <div class="code-line">counter = <span class="number">0</span></div>
     <div class="code-line"><span class="keyword">print</span>(<span class="string">"Начальное значение:"</span>, counter)  <span class="comment"># Вывод: 0</span></div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># Увеличиваем значение</span></div>
+    <div class="code-line"><span class="comment"># Увеличиваем значение</span></div>
     <div class="code-line">counter = counter + <span class="number">1</span></div>
     <div class="code-line"><span class="keyword">print</span>(<span class="string">"После увеличения:"</span>, counter)  <span class="comment"># Вывод: 1</span></div>
     <div class="code-line"></div>
-    <div class="code-line"><span class="keyword"># Или более короткая запись</span></div>
+    <div class="code-line"><span class="comment"># Или более короткая запись</span></div>
     <div class="code-line">counter += <span class="number">3</span>  <span class="comment"># То же, что counter = counter + 3</span></div>
     <div class="code-line"><span class="keyword">print</span>(<span class="string">"После += 3:"</span>, counter)  <span class="comment"># Вывод: 4</span></div>
 </div>

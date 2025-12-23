@@ -101,7 +101,7 @@ fun ChooseLevelScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(vertical = 28.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
                 items(levels) { level ->
 
@@ -145,7 +145,7 @@ fun ChooseLevelScreen(
                                     Text(
                                         text = "Выполнено",
                                         color = AppColors.DoneGreen,
-                                        fontSize = 20.sp
+                                        fontSize = 22.sp
                                     )
                                 }
                             }

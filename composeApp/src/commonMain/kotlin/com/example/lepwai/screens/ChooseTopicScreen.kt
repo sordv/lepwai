@@ -14,14 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lepwai.data.LearningNavigationState
-import com.example.lepwai.network.ChooseTopicApi
-import com.example.lepwai.network.Topic
-import com.example.lepwai.network.createHttpClient
+import com.example.lepwai.network.*
 import com.example.lepwai.theme.AppColors
 
 @Composable
 fun ChooseTopicScreen(
+    userLogin: String,
     courseId: Int,
     courseName: String,
     onBack: () -> Unit = {},
@@ -29,16 +27,32 @@ fun ChooseTopicScreen(
 ) {
 
     val client = remember { createHttpClient() }
-    val chooseTopicApi = remember { ChooseTopicApi(client, "http://10.0.2.2:8080") }
+    val topicApi = remember { ChooseTopicApi(client, "http://10.0.2.2:8080") }
+    val levelApi = remember { ChooseLevelApi(client, "http://10.0.2.2:8080") }
 
     var topics by remember { mutableStateOf<List<Topic>>(emptyList()) }
+    var completedLevels by remember { mutableStateOf<Set<Int>>(emptySet()) }
+    var topicLevels by remember { mutableStateOf<Map<Int, List<Int>>>(emptyMap()) }
     var error by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(courseId) {
         try {
-            topics = chooseTopicApi.getTopicsForCourse(courseId).sortedBy { it.sort }
+            topics = topicApi.getTopicsForCourse(courseId)
+
+            completedLevels = levelApi
+                .getUserProgress(userLogin)
+                .filter { it.status == "done" }
+                .map { it.levelId }
+                .toSet()
+
+            topicLevels = topics.associate { topic ->
+                topic.id to levelApi
+                    .getLevelsForTopic(topic.id)
+                    .map { it.id }
+            }
+
         } catch (e: Throwable) {
-            error = e.message ?: "Ошибка подключения к серверу"
+            error = e.message ?: "Ошибка загрузки"
         }
     }
 
@@ -47,19 +61,19 @@ fun ChooseTopicScreen(
             .fillMaxSize()
             .background(AppColors.BackgroundBlack)
     ) {
+
         // TOP BAR
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                //.background(AppColors.DifficultyEasy) // TODO убрать
                 .padding(15.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             Box(
                 modifier = Modifier
                     .size(65.dp)
-                    //.background(AppColors.DifficultyMedium) // TODO убрать
                     .clickable { onBack() },
                 contentAlignment = Alignment.Center
             ) {
@@ -77,9 +91,8 @@ fun ChooseTopicScreen(
                 fontSize = 36.sp
             )
 
-            Box(modifier = Modifier.size(65.dp)) // заглушка
+            Box(modifier = Modifier.size(65.dp))
         }
-        // END TOP BAR
 
         when {
             error != null -> Text(
@@ -88,31 +101,50 @@ fun ChooseTopicScreen(
                 modifier = Modifier.padding(16.dp)
             )
 
-            topics.isNotEmpty() ->
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    contentPadding = PaddingValues(vertical = 28.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    items(topics) { topic ->
+            else -> LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(vertical = 28.dp),
+                verticalArrangement = Arrangement.spacedBy(22.dp)
+            ) {
+                items(topics) { topic ->
+
+                    val levels = topicLevels[topic.id] ?: emptyList()
+                    val done = levels.count { completedLevels.contains(it) }
+                    val total = levels.size
+                    val progress = if (total == 0) 0f else done.toFloat() / total
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelectTopic(topic.id, topic.name) }
+                    ) {
+                        Text(
+                            text = topic.name,
+                            color = AppColors.TextWhite,
+                            fontSize = 30.sp
+                        )
+
+                        Spacer(Modifier.height(6.dp))
+
+                        // ПРОГРЕСС-БАР
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(60.dp)
-                                .clickable { onSelectTopic(topic.id, topic.name) }
-                                .padding(start = 12.dp),
-                            contentAlignment = Alignment.CenterStart
+                                .height(6.dp)
+                                .background(AppColors.BackGroundMediumGray)
                         ) {
-                            Text(
-                                text = topic.name,
-                                color = AppColors.TextWhite,
-                                fontSize = 32.sp
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(progress)
+                                    .height(6.dp)
+                                    .background(AppColors.DoneGreen)
                             )
                         }
                     }
                 }
+            }
         }
     }
 }

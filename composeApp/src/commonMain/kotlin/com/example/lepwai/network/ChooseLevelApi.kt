@@ -8,9 +8,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
 @Serializable data class Level(val id: Int, val name: String, val sort: Int, val parent: Int, val value: String, val answer: String?, val difficulty: Int?)
-@Serializable data class LevelProgressDto(val levelId: Int, val status: String)
+@Serializable data class LevelProgressDto(val levelId: Int, val status: String, val answer: String?)
 @Serializable data class CompleteLevelRequest(val login: String, val levelId: Int)
-
+@Serializable data class RunPracticeRequest(val login: String, val levelId: Int, val code: String)
+@Serializable data class RunPracticeResponse(val success: Boolean, val output: String, val compileError: Boolean)
 class ChooseLevelApi(private val client: HttpClient, private val baseUrl: String) {
     suspend fun getLevelsForTopic(topicId: Int): List<Level> {
         return client.get("$baseUrl/topics/$topicId/levels").body()
@@ -29,4 +30,12 @@ class ChooseLevelApi(private val client: HttpClient, private val baseUrl: String
             setBody(CompleteLevelRequest(login, levelId))
         }
     }
+
+    suspend fun runPractice(login: String, levelId: Int, code: String): RunPracticeResponse {
+        return client.post("$baseUrl/levels/run-practice") {
+            contentType(ContentType.Application.Json)
+            setBody(RunPracticeRequest(login, levelId, code))
+        }.body()
+    }
+
 }
