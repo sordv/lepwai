@@ -75,6 +75,12 @@ object Messages : IntIdTable("messages") {
     val content = text("content")
 }
 
+object UserLevelProgress : IntIdTable("user_level_progress") {
+    val userLogin = varchar("user_login", 30)
+    val levelId = integer("level_id")
+    val status = varchar("status", 15)
+}
+
 @Serializable data class Health(val status: String, val ts: String)
 @Serializable data class DbTestResult(val ok: Boolean, val result: Int?, val error: String?)
 
@@ -87,6 +93,8 @@ object Messages : IntIdTable("messages") {
 @kotlinx.serialization.Serializable data class TopicDTO(val id: Int, val name: String, val sort: Int, val parent: Int)
 @kotlinx.serialization.Serializable data class LevelDTO(val id: Int, val name: String, val sort: Int, val parent: Int, val value: String, val answer: String?, val difficulty: Int?)
 
+@Serializable data class LevelProgressDto(val levelId: Int, val status: String)
+@Serializable data class CompleteLevelRequest(val login: String, val levelId: Int)
 @Serializable data class ChatDto(val id: Int, val title: String)
 @Serializable data class MessageDto(val id: Int, val isUserMsg: Boolean, val content: String)
 @Serializable data class SendMessageRequest(val chatId: Int?, val message: String)
@@ -512,6 +520,44 @@ fun main() {
                         mapOf("error" to (t.message ?: "unknown"))
                     )
                 }
+            }
+
+            get("/user/{login}/progress") {
+                val login = call.parameters["login"]!!
+
+                val progress = transaction {
+                    UserLevelProgress
+                        .select { UserLevelProgress.userLogin eq login }
+                        .map {
+                            LevelProgressDto(
+                                levelId = it[UserLevelProgress.levelId],
+                                status = it[UserLevelProgress.status]
+                            )
+                        }
+                }
+
+                call.respond(progress)
+            }
+
+            post("/levels/complete") {
+                val req = call.receive<CompleteLevelRequest>()
+
+                transaction {
+                    val exists = UserLevelProgress.select {
+                        (UserLevelProgress.userLogin eq req.login) and
+                                (UserLevelProgress.levelId eq req.levelId)
+                    }.count() > 0
+
+                    if (!exists) {
+                        UserLevelProgress.insert {
+                            it[userLogin] = req.login
+                            it[levelId] = req.levelId
+                            it[status] = "done"
+                        }
+                    }
+                }
+
+                call.respond(HttpStatusCode.OK)
             }
 
             get("/chat/list") {

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript: Операторы и вычисления</title>
+    <link rel="stylesheet" href="../theme/styles.css">
+</head>
+<body>
+<h1>Программирование на JavaScript: Операторы и вычисления</h1>
+
+<p>Операторы в JavaScript позволяют выполнять различные операции с переменными и значениями. Они делятся на несколько категорий: арифметические, сравнения, логические, присваивания и другие.</p>
+
+<h2>Арифметические операторы</h2>
+<p>Используются для математических вычислений:</p>
+
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> a = <span class="number">15</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> b = <span class="number">4</span>;</div>
+    <div class="code-line"></div>
+    <div class="code-line">console.log(a + b);   <span class="comment">// Сложение: 19</span></div>
+    <div class="code-line">console.log(a - b);   <span class="comment">// Вычитание: 11</span></div>
+    <div class="code-line">console.log(a * b);   <span class="comment">// Умножение: 60</span></div>
+    <div class="code-line">console.log(a / b);   <span class="comment">// Деление: 3.75</span></div>
+    <div class="code-line">console.log(a % b);   <span class="comment">// Остаток от деления: 3</span></div>
+    <div class="code-line">console.log(a ** b);  <span class="comment">// Возведение в степень: 50625 (ES7+)</span></div>
+    <div class="code-line">console.log(++a);     <span class="comment">// Инкремент: увеличивает на 1 (теперь a = 16)</span></div>
+    <div class="code-line">console.log(--b);     <span class="comment">// Декремент: уменьшает на 1 (теперь b = 3)</span></div>
+</div>
+
+<h3>Особые случаи</h3>
+<div class="code-block">
+    <div class="code-line">console.log(<span class="number">5</span> / <span class="number">0</span>);       <span class="comment">// Infinity (бесконечность)</span></div>
+    <div class="code-line">console.log(-<span class="number">5</span> / <span class="number">0</span>);      <span class="comment">// -Infinity</span></div>
+    <div class="code-line">console.log(<span class="string">"текст"</span> / <span class="number">2</span>); <span class="comment">// NaN (Not a Number)</span></div>
+    <div class="code-line">console.log(<span class="number">0</span> / <span class="number">0</span>);        <span class="comment">// NaN</span></div>
+</div>
+
+<h2>Операторы присваивания</h2>
+
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> x = <span class="number">10</span>;</div>
+    <div class="code-line"></div>
+    <div class="code-line">x += <span class="number">5</span>;   <span class="comment">// x = x + 5 (15)</span></div>
+    <div class="code-line">x -= <span class="number">3</span>;   <span class="comment">// x = x - 3 (12)</span></div>
+    <div class="code-line">x *= <span class="number">2</span>;   <span class="comment">// x = x * 2 (24)</span></div>
+    <div class="code-line">x /= <span class="number">4</span>;   <span class="comment">// x = x / 4 (6)</span></div>
+    <div class="code-line">x %= <span class="number">5</span>;   <span class="comment">// x = x % 5 (1)</span></div>
+    <div class="code-line">x **= <span class="number">3</span>;  <span class="comment">// x = x ** 3 (1)</span></div>
+</div>
+
+<h2>Операторы сравнения</h2>
+<p>Возвращают <span class="highlight">true</span> или <span class="highlight">false</span>:</p>
+
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> num1 = <span class="number">10</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> num2 = <span class="number">5</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> strNum = <span class="string">"10"</span>;</div>
+    <div class="code-line"></div>
+    <div class="code-line">console.log(num1 == strNum);   <span class="comment">// true (нестрогое равенство)</span></div>
+    <div class="code-line">console.log(num1 === strNum);  <span class="comment">// false (строгое равенство, разные типы)</span></div>
+    <div class="code-line">console.log(num1 != strNum);   <span class="comment">// false (нестрогое неравенство)</span></div>
+    <div class="code-line">console.log(num1 !== strNum);  <span class="comment">// true (строгое неравенство)</span></div>
+    <div class="code-line">console.log(num1 > num2);      <span class="comment">// true</span></div>
+    <div class="code-line">console.log(num1 < num2);      <span class="comment">// false</span></div>
+    <div class="code-line">console.log(num1 >= <span class="number">10</span>);      <span class="comment">// true</span></div>
+    <div class="code-line">console.log(num1 <= <span class="number">9</span>);       <span class="comment">// false</span></div>
+</div>
+
+<div class="note">
+    <p><strong>Важно:</strong> Всегда используйте строгие операторы сравнения (<span class="highlight">===</span> и <span class="highlight">!==</span>). Они сравнивают и значение, и тип, что предотвращает множество ошибок.</p>
+</div>
+
+<h2>Логические операторы</h2>
+
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> age = <span class="number">25</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> hasLicense = <span class="keyword">true</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> hasCar = <span class="keyword">false</span>;</div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// && (И) - истинно, если оба операнда истинны</span></div>
+    <div class="code-line"><span class="keyword">let</span> canDrive = (age >= <span class="number">18</span>) && hasLicense;</div>
+    <div class="code-line">console.log(canDrive); <span class="comment">// true</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// || (ИЛИ) - истинно, если хотя бы один операнд истинен</span></div>
+    <div class="code-line"><span class="keyword">let</span> canRentCar = (age >= <span class="number">21</span>) || hasCar;</div>
+    <div class="code-line">console.log(canRentCar); <span class="comment">// true</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// ! (НЕ) - инвертирует значение</span></div>
+    <div class="code-line"><span class="keyword">let</span> cannotDrive = !canDrive;</div>
+    <div class="code-line">console.log(cannotDrive); <span class="comment">// false</span></div>
+</div>
+
+<h3>Логические операторы с небулевыми значениями</h3>
+<div class="code-block">
+    <div class="code-line"><span class="comment">// || возвращает первый истинный операнд</span></div>
+    <div class="code-line"><span class="keyword">let</span> name = <span class="string">""</span> || <span class="string">"Гость"</span> || <span class="string">"Аноним"</span>;</div>
+    <div class="code-line">console.log(name); <span class="comment">// "Гость"</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// && возвращает первый ложный операнд или последний истинный</span></div>
+    <div class="code-line"><span class="keyword">let</span> result = <span class="string">"Привет"</span> && <span class="number">0</span> && <span class="string">"Мир"</span>;</div>
+    <div class="code-line">console.log(result); <span class="comment">// 0</span></div>
+</div>
+
+<h2>Операторы для работы со строками</h2>
+
+<h3>Конкатенация</h3>
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> greeting = <span class="string">"Привет"</span> + <span class="string">" "</span> + <span class="string">"мир"</span> + <span class="string">"!"</span>;</div>
+    <div class="code-line">console.log(greeting); <span class="comment">// "Привет мир!"</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// С числами - происходит преобразование в строку</span></div>
+    <div class="code-line"><span class="keyword">let</span> message = <span class="string">"Сегодня "</span> + <span class="number">27</span> + <span class="string">" октября"</span>;</div>
+    <div class="code-line">console.log(message); <span class="comment">// "Сегодня 27 октября"</span></div>
+</div>
+
+<h3>Шаблонные строки (template literals)</h3>
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> userName = <span class="string">"Анна"</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> userAge = <span class="number">25</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> score = <span class="number">95.5</span>;</div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword">let</span> info = <span class="string">`Пользователь: <span class="keyword">${</span>userName<span class="keyword">}</span>
+Возраст: <span class="keyword">${</span>userAge<span class="keyword">}</span> лет
+Результат: <span class="keyword">${</span>score<span class="keyword">}</span> из 100
+Дата проверки: <span class="keyword">${</span><span class="keyword">new Date</span>().toLocaleDateString()<span class="keyword">}</span>`</span>;</div>
+    <div class="code-line">console.log(info);</div>
+</div>
+
+<h3>Методы строк</h3>
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> text = <span class="string">"  JavaScript - это интересно!  "</span>;</div>
+    <div class="code-line"></div>
+    <div class="code-line">console.log(text.length);               <span class="comment">// 33 (длина строки)</span></div>
+    <div class="code-line">console.log(text.toUpperCase());         <span class="comment">// "  JAVASCRIPT - ЭТО ИНТЕРЕСНО!  "</span></div>
+    <div class="code-line">console.log(text.toLowerCase());         <span class="comment">// "  javascript - это интересно!  "</span></div>
+    <div class="code-line">console.log(text.trim());                <span class="comment">// "JavaScript - это интересно!"</span></div>
+    <div class="code-line">console.log(text.indexOf(<span class="string">"интересно"</span>)); <span class="comment">// 19 (позиция начала слова)</span></div>
+    <div class="code-line">console.log(text.slice(<span class="number">2</span>, <span class="number">12</span>));        <span class="comment">// "JavaScript"</span></div>
+    <div class="code-line">console.log(text.replace(<span class="string">"интересно"</span>, <span class="string">"круто"</span>));</div>
+    <div class="code-line">console.log(text.includes(<span class="string">"JavaScript"</span>)); <span class="comment">// true</span></div>
+    <div class="code-line">console.log(text.startsWith(<span class="string">"  Java"</span>));  <span class="comment">// true</span></div>
+    <div class="code-line">console.log(text.endsWith(<span class="string">"!  "</span>));       <span class="comment">// true</span></div>
+</div>
+
+<h3>Работа с символами строки</h3>
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> language = <span class="string">"JavaScript"</span>;</div>
+    <div class="code-line"></div>
+    <div class="code-line">console.log(language[<span class="number">0</span>]);      <span class="comment">// "J" (доступ по индексу)</span></div>
+    <div class="code-line">console.log(language.charAt(<span class="number">4</span>)); <span class="comment">// "S" (метод charAt)</span></div>
+    <div class="code-line">console.log(language.charCodeAt(<span class="number">0</span>)); <span class="comment">// 74 (код символа "J")</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// Сравнение строк (лексикографическое)</span></div>
+    <div class="code-line">console.log(<span class="string">"apple"</span> < <span class="string">"banana"</span>);   <span class="comment">// true</span></div>
+    <div class="code-line">console.log(<span class="string">"Яблоко"</span> > <span class="string">"Апельсин"</span>); <span class="comment">// true (по таблице Unicode)</span></div>
+</div>
+
+<h2>Тернарный оператор</h2>
+<p>Краткая форма записи if-else:</p>
+
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> age = <span class="number">20</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> status = (age >= <span class="number">18</span>) ? <span class="string">"совершеннолетний"</span> : <span class="string">"несовершеннолетний"</span>;</div>
+    <div class="code-line">console.log(status); <span class="comment">// "совершеннолетний"</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// Эквивалент if-else:</span></div>
+    <div class="code-line"><span class="keyword">let</span> status2;</div>
+    <div class="code-line"><span class="keyword">if</span> (age >= <span class="number">18</span>) {</div>
+    <div class="code-line">    status2 = <span class="string">"совершеннолетний"</span>;</div>
+    <div class="code-line">} <span class="keyword">else</span> {</div>
+    <div class="code-line">    status2 = <span class="string">"несовершеннолетний"</span>;</div>
+    <div class="code-line">}</div>
+</div>
+
+<h2>Операторы для работы с типами</h2>
+
+<div class="code-block">
+    <div class="code-line"><span class="comment">// typeof - возвращает тип операнда</span></div>
+    <div class="code-line">console.log(<span class="keyword">typeof</span> <span class="number">42</span>);           <span class="comment">// "number"</span></div>
+    <div class="code-line">console.log(<span class="keyword">typeof</span> <span class="string">"текст"</span>);       <span class="comment">// "string"</span></div>
+    <div class="code-line">console.log(<span class="keyword">typeof</span> <span class="keyword">true</span>);         <span class="comment">// "boolean"</span></div>
+    <div class="code-line">console.log(<span class="keyword">typeof</span> {});            <span class="comment">// "object"</span></div>
+    <div class="code-line">console.log(<span class="keyword">typeof</span> []);            <span class="comment">// "object" (особенность JS)</span></div>
+    <div class="code-line">console.log(<span class="keyword">typeof</span> <span class="keyword">null</span>);         <span class="comment">// "object" (историческая особенность)</span></div>
+    <div class="code-line">console.log(<span class="keyword">typeof</span> <span class="keyword">undefined</span>);    <span class="comment">// "undefined"</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// instanceof - проверяет, является ли объект экземпляром класса</span></div>
+    <div class="code-line"><span class="keyword">let</span> date = <span class="keyword">new</span> Date();</div>
+    <div class="code-line">console.log(date <span class="keyword">instanceof</span> Date);  <span class="comment">// true</span></div>
+    <div class="code-line">console.log(date <span class="keyword">instanceof</span> Object); <span class="comment">// true</span></div>
+</div>
+
+<h2>Приоритет операторов</h2>
+<p>Порядок выполнения (от высшего к низшему):</p>
+
+<ol>
+    <li><span class="highlight">()</span> — группировка</li>
+    <li><span class="highlight">++ -- ! typeof</span> — унарные операторы</li>
+    <li><span class="highlight">**</span> — возведение в степень</li>
+    <li><span class="highlight">* / %</span> — умножение, деление, остаток</li>
+    <li><span class="highlight">+ -</span> — сложение, вычитание</li>
+    <li><span class="highlight">< <= > >=</span> — сравнение</li>
+    <li><span class="highlight">== != === !==</span> — равенство</li>
+    <li><span class="highlight">&&</span> — логическое И</li>
+    <li><span class="highlight">||</span> — логическое ИЛИ</li>
+    <li><span class="highlight">= += -= *= /= %= **=</span> — присваивание</li>
+</ol>
+
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> result = <span class="number">5</span> + <span class="number">3</span> * <span class="number">2</span> ** <span class="number">2</span>;</div>
+    <div class="code-line">console.log(result); <span class="comment">// 17 (2**2=4, 3*4=12, 5+12=17)</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// Используйте скобки для явного указания порядка</span></div>
+    <div class="code-line"><span class="keyword">let</span> result2 = (<span class="number">5</span> + <span class="number">3</span>) * <span class="number">2</span> ** <span class="number">2</span>;</div>
+    <div class="code-line">console.log(result2); <span class="comment">// 32 (5+3=8, 2**2=4, 8*4=32)</span></div>
+</div>
+
+<div class="note">
+    <p><strong>Совет:</strong> Всегда используйте скобки для сложных выражений, даже если они не требуются. Это сделает ваш код понятнее и предотвратит ошибки.</p>
+</div>
+</body>
+</html>

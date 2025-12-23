@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python: Переменные</title>
+    <link rel="stylesheet" href="../theme/styles.css">
+</head>
+<body>
+<h1>Программирование на Python: Переменные</h1>
+
+<p>Переменные — это основа программирования. Представьте себе коробку, на которой написано имя, а внутри лежит какое-то значение. В Python переменные работают именно так: они хранят данные, которые можно использовать в программе.</p>
+
+<h2>Что такое переменная?</h2>
+<p>Переменная — это именованная область памяти, которая хранит данные. Когда вы создаёте переменную, вы резервируете место в памяти компьютера для хранения значения.</p>
+
+<div class="note">
+    <p><strong>Важно:</strong> В Python не нужно объявлять тип переменной заранее. Python сам определяет тип данных на основе присвоенного значения.</p>
+</div>
+
+<h2>Как объявлять переменные</h2>
+
+<h3>Простое присваивание</h3>
+<p>Для создания переменной просто придумайте имя и используйте оператор <span class="highlight">=</span> (равно):</p>
+
+<div class="code-block">
+    <div class="code-line"><span class="keyword"># Создаём переменные</span></div>
+    <div class="code-line">age = <span class="number">25</span></div>
+    <div class="code-line">name = <span class="string">"Анна"</span></div>
+    <div class="code-line">temperature = <span class="number">36.6</span></div>
+    <div class="code-line">is_student = <span class="keyword">True</span></div>
+</div>
+
+<h3>Множественное присваивание</h3>
+<p>В Python можно создать несколько переменных одновременно:</p>
+
+<div class="code-block">
+    <div class="code-line"><span class="keyword"># Несколько переменных в одной строке</span></div>
+    <div class="code-line">x, y, z = <span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># Присвоение одного значения нескольким переменным</span></div>
+    <div class="code-line">a = b = c = <span class="number">100</span></div>
+</div>
+
+<h2>Правила именования переменных</h2>
+<ul>
+    <li>Имя должно начинаться с буквы или символа подчёркивания (_)</li>
+    <li>Имя не может начинаться с цифры</li>
+    <li>Имя может содержать только буквы, цифры и подчёркивания (A-z, 0-9, _)</li>
+    <li>Имена чувствительны к регистру (age, Age и AGE — разные переменные)</li>
+    <li>Используйте понятные имена: <span class="highlight">user_name</span> лучше, чем <span class="highlight">un</span></li>
+</ul>
+
+<div class="example-box">
+    <h3>Примеры правильных имён:</h3>
+    <div class="code-block">
+        <div class="code-line">user_name = <span class="string">"Иван"</span></div>
+        <div class="code-line">_private_data = <span class="string">"секретно"</span></div>
+        <div class="code-line">total_price = <span class="number">1500.75</span></div>
+        <div class="code-line">is_valid = <span class="keyword">True</span></div>
+    </div>
+
+    <h3>Примеры неправильных имён:</h3>
+    <div class="code-block">
+        <div class="code-line"><span class="comment"># 1st_place = "первое"  # Ошибка: начинается с цифры</span></div>
+        <div class="code-line"><span class="comment"># user-name = "Мария"  # Ошибка: содержит дефис</span></div>
+        <div class="code-line"><span class="comment"># class = "Python"     # Ошибка: class - зарезервированное слово</span></div>
+    </div>
+</div>
+
+<h2>Как применять переменные</h2>
+
+<h3>Использование в вычислениях</h3>
+<div class="code-block">
+    <div class="code-line"><span class="keyword"># Создаём переменные</span></div>
+    <div class="code-line">price = <span class="number">500</span></div>
+    <div class="code-line">quantity = <span class="number">3</span></div>
+    <div class="code-line">discount = <span class="number">0.1</span>  <span class="comment"># 10% скидка</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># Вычисляем общую стоимость</span></div>
+    <div class="code-line">total = price * quantity</div>
+    <div class="code-line">total_with_discount = total - (total * discount)</div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># Выводим результат</span></div>
+    <div class="code-line"><span class="keyword">print</span>(<span class="string">"Общая стоимость:"</span>, total)</div>
+    <div class="code-line"><span class="keyword">print</span>(<span class="string">"Со скидкой:"</span>, total_with_discount)</div>
+</div>
+
+<h3>Работа со строками</h3>
+<div class="code-block">
+    <div class="code-line">first_name = <span class="string">"Иван"</span></div>
+    <div class="code-line">last_name = <span class="string">"Петров"</span></div>
+    <div class="code-line">age = <span class="number">30</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># Конкатенация (сложение) строк</span></div>
+    <div class="code-line">full_name = first_name + <span class="string">" "</span> + last_name</div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># Форматирование строк</span></div>
+    <div class="code-line">greeting = <span class="string">f"Привет, меня зовут {full_name} и мне {age} лет"</span></div>
+    <div class="code-line"><span class="keyword">print</span>(greeting)</div>
+</div>
+
+<h3>Изменение значений переменных</h3>
+<p>Значение переменной можно изменять в любой момент:</p>
+
+<div class="code-block">
+    <div class="code-line">counter = <span class="number">0</span></div>
+    <div class="code-line"><span class="keyword">print</span>(<span class="string">"Начальное значение:"</span>, counter)  <span class="comment"># Вывод: 0</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># Увеличиваем значение</span></div>
+    <div class="code-line">counter = counter + <span class="number">1</span></div>
+    <div class="code-line"><span class="keyword">print</span>(<span class="string">"После увеличения:"</span>, counter)  <span class="comment"># Вывод: 1</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># Или более короткая запись</span></div>
+    <div class="code-line">counter += <span class="number">3</span>  <span class="comment"># То же, что counter = counter + 3</span></div>
+    <div class="code-line"><span class="keyword">print</span>(<span class="string">"После += 3:"</span>, counter)  <span class="comment"># Вывод: 4</span></div>
+</div>
+
+<h2>Основные типы данных</h2>
+<ul>
+    <li><span class="keyword">int</span> — целые числа: <span class="highlight">10, -5, 0</span></li>
+    <li><span class="keyword">float</span> — числа с плавающей точкой: <span class="highlight">3.14, -0.5, 2.0</span></li>
+    <li><span class="keyword">str</span> — строки (текст): <span class="highlight">"Привет", 'Python'</span></li>
+    <li><span class="keyword">bool</span> — логический тип: <span class="highlight">True, False</span></li>
+    <li><span class="keyword">NoneType</span> — специальный тип для отсутствия значения: <span class="highlight">None</span></li>
+</ul>
+
+<div class="note">
+    <p><strong>Совет:</strong> Чтобы узнать тип переменной, используйте функцию <span class="highlight">type()</span>. Например: <span class="highlight">type(age)</span> вернёт <span class="highlight">&lt;class 'int'&gt;</span></p>
+</div>
+</body>
+</html>

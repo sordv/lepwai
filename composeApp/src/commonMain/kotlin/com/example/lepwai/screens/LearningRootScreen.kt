@@ -5,6 +5,7 @@ import com.example.lepwai.data.LearningNavigationState
 
 @Composable
 fun LearningRootScreen(
+    userLogin: String,
     learningState: LearningNavigationState,
     onResetToCourses: () -> Unit = {}
 ) {
@@ -25,8 +26,8 @@ fun LearningRootScreen(
                 onBack = {
                     learningState.selectedCourseId = null
                     learningState.selectedCourseName = null
-                    learningState.selectedTopicId = null
-                    learningState.selectedLevelId = null
+                    //learningState.selectedTopicId = null
+                    //learningState.selectedLevelId = null
                 },
                 onSelectTopic = { id, name ->
                     learningState.selectedTopicId = id
@@ -37,12 +38,13 @@ fun LearningRootScreen(
 
         learningState.selectedLevelId == null -> {
             ChooseLevelScreen(
+                userLogin = userLogin,
                 topicId = learningState.selectedTopicId!!,
                 topicName = learningState.selectedTopicName ?: "",
                 onBack = {
                     learningState.selectedTopicId = null
                     learningState.selectedTopicName = null
-                    learningState.selectedLevelId = null
+                    //learningState.selectedLevelId = null
                 },
                 onSelectLevel = { id, name ->
                     learningState.selectedLevelId = id
@@ -53,6 +55,7 @@ fun LearningRootScreen(
 
         else -> {
             ViewLevelScreen(
+                userLogin = userLogin,
                 levelId = learningState.selectedLevelId!!,
                 levelName = learningState.selectedLevelName ?: "",
                 onBack = {

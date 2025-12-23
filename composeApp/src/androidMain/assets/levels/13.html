@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript: Переменные</title>
+    <link rel="stylesheet" href="../theme/styles.css">
+</head>
+<body>
+<h1>Программирование на JavaScript: Переменные</h1>
+
+<p>Переменные в JavaScript — это контейнеры для хранения данных. Они позволяют сохранять информацию в памяти компьютера и использовать её в разных частях программы. В отличие от Python, в JavaScript есть несколько способов объявления переменных.</p>
+
+<h2>Способы объявления переменных</h2>
+
+<h3>1. var (устаревший способ)</h3>
+<p>Использовался в старых версиях JavaScript. Имеет функциональную область видимости.</p>
+
+<div class="code-block">
+    <div class="code-line"><span class="keyword">var</span> age = <span class="number">25</span>;</div>
+    <div class="code-line"><span class="keyword">var</span> name = <span class="string">"Анна"</span>;</div>
+    <div class="code-line"><span class="keyword">var</span> isStudent = <span class="keyword">true</span>;</div>
+</div>
+
+<div class="note">
+    <p><strong>Важно:</strong> В современном JavaScript рекомендуется не использовать <span class="highlight">var</span> из-за особенностей области видимости.</p>
+</div>
+
+<h3>2. let (современный способ)</h3>
+<p>Имеет блочную область видимости. Значение можно изменять.</p>
+
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> counter = <span class="number">0</span>;</div>
+    <div class="code-line">counter = <span class="number">10</span>; <span class="comment">// Можно изменить</span></div>
+    <div class="code-line"><span class="keyword">let</span> price = <span class="number">99.99</span>;</div>
+</div>
+
+<h3>3. const (для констант)</h3>
+<p>Имеет блочную область видимости. Значение нельзя изменить после присваивания.</p>
+
+<div class="code-block">
+    <div class="code-line"><span class="keyword">const</span> PI = <span class="number">3.14159</span>;</div>
+    <div class="code-line"><span class="comment">// PI = 3.14; // Ошибка! Нельзя изменить константу</span></div>
+    <div class="code-line"><span class="keyword">const</span> APP_NAME = <span class="string">"Моё приложение"</span>;</div>
+</div>
+
+<div class="example-box">
+    <h3>Рекомендации по выбору:</h3>
+    <ul>
+        <li>Используйте <span class="highlight">const</span> по умолчанию</li>
+        <li>Используйте <span class="highlight">let</span>, если значение будет меняться</li>
+        <li>Избегайте <span class="highlight">var</span> в новом коде</li>
+    </ul>
+</div>
+
+<h2>Правила именования переменных</h2>
+<ul>
+    <li>Имя может содержать буквы, цифры, символы $ и _</li>
+    <li>Первым символом не может быть цифра</li>
+    <li>Регистр имеет значение (age и Age — разные переменные)</li>
+    <li>Нельзя использовать зарезервированные слова (if, else, function и т.д.)</li>
+    <li>Рекомендуется использовать camelCase: <span class="highlight">userName</span>, <span class="highlight">totalPrice</span></li>
+</ul>
+
+<div class="code-block">
+    <div class="code-line"><span class="comment">// Правильные имена</span></div>
+    <div class="code-line"><span class="keyword">let</span> userName = <span class="string">"Иван"</span>;</div>
+    <div class="code-line"><span class="keyword">const</span> MAX_USERS = <span class="number">100</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> $price = <span class="number">50</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> _privateData = <span class="string">"скрыто"</span>;</div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// Неправильные имена</span></div>
+    <div class="code-line"><span class="comment">// let 1stPlace = "первое"; // Начинается с цифры</span></div>
+    <div class="code-line"><span class="comment">// let user-name = "Мария"; // Содержит дефис</span></div>
+    <div class="code-line"><span class="comment">// let let = "слово"; // Зарезервированное слово</span></div>
+</div>
+
+<h2>Типы данных в JavaScript</h2>
+
+<h3>Примитивные типы:</h3>
+<ul>
+    <li><span class="keyword">string</span> — строки: <span class="highlight">"Привет"</span></li>
+    <li><span class="keyword">number</span> — числа: <span class="highlight">42, 3.14, -10</span></li>
+    <li><span class="keyword">boolean</span> — логические: <span class="highlight">true, false</span></li>
+    <li><span class="keyword">undefined</span> — неопределённое значение</li>
+    <li><span class="keyword">null</span> — пустое значение</li>
+    <li><span class="keyword">symbol</span> — уникальные идентификаторы (ES6+)</li>
+    <li><span class="keyword">bigint</span> — большие целые числа (ES2020+)</li>
+</ul>
+
+<h3>Объектные типы:</h3>
+<ul>
+    <li><span class="keyword">object</span> — объекты: <span class="highlight">{name: "Иван"}</span></li>
+    <li><span class="keyword">array</span> — массивы: <span class="highlight">[1, 2, 3]</span></li>
+    <li><span class="keyword">function</span> — функции</li>
+</ul>
+
+<h3>Как узнать тип переменной</h3>
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> name = <span class="string">"Анна"</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> age = <span class="number">30</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> isActive = <span class="keyword">true</span>;</div>
+    <div class="code-line"></div>
+    <div class="code-line">console.log(<span class="keyword">typeof</span> name);     <span class="comment">// "string"</span></div>
+    <div class="code-line">console.log(<span class="keyword">typeof</span> age);      <span class="comment">// "number"</span></div>
+    <div class="code-line">console.log(<span class="keyword">typeof</span> isActive); <span class="comment">// "boolean"</span></div>
+    <div class="code-line">console.log(<span class="keyword">typeof</span> undefinedVar); <span class="comment">// "undefined"</span></div>
+</div>
+
+<h2>Практические примеры использования</h2>
+
+<h3>Математические вычисления</h3>
+<div class="code-block">
+    <div class="code-line"><span class="keyword">const</span> price = <span class="number">500</span>;</div>
+    <div class="code-line"><span class="keyword">const</span> quantity = <span class="number">3</span>;</div>
+    <div class="code-line"><span class="keyword">const</span> discount = <span class="number">0.1</span>; <span class="comment">// 10%</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword">let</span> total = price * quantity;</div>
+    <div class="code-line"><span class="keyword">let</span> finalPrice = total - (total * discount);</div>
+    <div class="code-line"></div>
+    <div class="code-line">console.log(<span class="string">"Общая стоимость:"</span>, total);</div>
+    <div class="code-line">console.log(<span class="string">"Со скидкой:"</span>, finalPrice);</div>
+</div>
+
+<h3>Работа со строками</h3>
+<div class="code-block">
+    <div class="code-line"><span class="keyword">const</span> firstName = <span class="string">"Иван"</span>;</div>
+    <div class="code-line"><span class="keyword">const</span> lastName = <span class="string">"Петров"</span>;</div>
+    <div class="code-line"><span class="keyword">let</span> age = <span class="number">30</span>;</div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// Конкатенация строк</span></div>
+    <div class="code-line"><span class="keyword">const</span> fullName = firstName + <span class="string">" "</span> + lastName;</div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// Шаблонные строки (template literals)</span></div>
+    <div class="code-line"><span class="keyword">const</span> greeting = <span class="string">`Привет, меня зовут <span class="keyword">${</span>fullName<span class="keyword">}</span> и мне <span class="keyword">${</span>age<span class="keyword">}</span> лет`</span>;</div>
+    <div class="code-line">console.log(greeting);</div>
+</div>
+
+<h3>Изменение значений</h3>
+<div class="code-block">
+    <div class="code-line"><span class="keyword">let</span> counter = <span class="number">0</span>;</div>
+    <div class="code-line">console.log(<span class="string">"Начальное значение:"</span>, counter); <span class="comment">// 0</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// Увеличение значения</span></div>
+    <div class="code-line">counter = counter + <span class="number">1</span>;</div>
+    <div class="code-line">console.log(<span class="string">"После увеличения:"</span>, counter); <span class="comment">// 1</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// Сокращённая запись</span></div>
+    <div class="code-line">counter += <span class="number">3</span>; <span class="comment">// То же, что counter = counter + 3</span></div>
+    <div class="code-line">console.log(<span class="string">"После += 3:"</span>, counter); <span class="comment">// 4</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// Инкремент</span></div>
+    <div class="code-line">counter++; <span class="comment">// Увеличивает на 1</span></div>
+    <div class="code-line">console.log(<span class="string">"После ++:"</span>, counter); <span class="comment">// 5</span></div>
+</div>
+
+<h2>Особенности переменных в JavaScript</h2>
+
+<div class="code-block">
+    <div class="code-line"><span class="comment">// Динамическая типизация (как в Python)</span></div>
+    <div class="code-line"><span class="keyword">let</span> value = <span class="number">42</span>;        <span class="comment">// число</span></div>
+    <div class="code-line">value = <span class="string">"теперь строка"</span>; <span class="comment">// строка - можно менять тип!</span></div>
+    <div class="code-line">value = <span class="keyword">true</span>;          <span class="comment">// boolean</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="comment">// Область видимости let vs var</span></div>
+    <div class="code-line"><span class="keyword">if</span> (<span class="keyword">true</span>) {</div>
+    <div class="code-line">    <span class="keyword">let</span> blockVar = <span class="string">"видна только в блоке"</span>;</div>
+    <div class="code-line">    <span class="keyword">var</span> functionVar = <span class="string">"видна везде в функции"</span>;</div>
+    <div class="code-line">}</div>
+    <div class="code-line"><span class="comment">// console.log(blockVar); // Ошибка!</span></div>
+    <div class="code-line">console.log(functionVar); <span class="comment">// Работает</span></div>
+</div>
+
+<div class="note">
+    <p><strong>Совет:</strong> Всегда объявляйте переменные с помощью <span class="highlight">let</span> или <span class="highlight">const</span> перед использованием. Использование необъявленных переменных создаёт глобальные переменные, что может привести к ошибкам.</p>
+</div>
+</body>
+</html>

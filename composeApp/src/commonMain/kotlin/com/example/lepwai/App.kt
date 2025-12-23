@@ -133,6 +133,7 @@ fun App(settingsRepo: SettingsRepo) {
             ) {
                 when (selectedScreen) {
                     "learning" -> LearningRootScreen(
+                        userLogin = loggedInUser!!,
                         learningState = learningState,
                         onResetToCourses = {
                             learningState.selectedCourseId = null

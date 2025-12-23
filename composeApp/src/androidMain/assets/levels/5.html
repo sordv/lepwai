@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python: Операторы и вычисления</title>
+    <link rel="stylesheet" href="../theme/styles.css">
+</head>
+<body>
+<h1>Программирование на Python: Операторы, вычисления и операции над строками</h1>
+
+<p>Операторы — это специальные символы или ключевые слова, которые выполняют операции над переменными и значениями. В Python есть операторы для работы с числами, строками, сравнения и логические операторы.</p>
+
+<h2>Арифметические операторы</h2>
+<p>Используются для выполнения математических операций:</p>
+
+<div class="code-block">
+    <div class="code-line">a = <span class="number">15</span></div>
+    <div class="code-line">b = <span class="number">4</span></div>
+    <div class="code-line"></div>
+    <div class="code-line">сумма = a + b        <span class="comment"># Сложение: 19</span></div>
+    <div class="code-line">разность = a - b     <span class="comment"># Вычитание: 11</span></div>
+    <div class="code-line">произведение = a * b <span class="comment"># Умножение: 60</span></div>
+    <div class="code-line">частное = a / b      <span class="comment"># Деление: 3.75</span></div>
+    <div class="code-line">целочисленное = a // b <span class="comment"># Целочисленное деление: 3</span></div>
+    <div class="code-line">остаток = a % b      <span class="comment"># Остаток от деления: 3</span></div>
+    <div class="code-line">степень = a ** b     <span class="comment"># Возведение в степень: 50625</span></div>
+</div>
+
+<h3>Сокращённые операторы присваивания</h3>
+<div class="code-block">
+    <div class="code-line">x = <span class="number">10</span></div>
+    <div class="code-line">x += <span class="number">5</span>   <span class="comment"># x = x + 5, теперь x = 15</span></div>
+    <div class="code-line">x -= <span class="number">3</span>   <span class="comment"># x = x - 3, теперь x = 12</span></div>
+    <div class="code-line">x *= <span class="number">2</span>   <span class="comment"># x = x * 2, теперь x = 24</span></div>
+    <div class="code-line">x /= <span class="number">4</span>   <span class="comment"># x = x / 4, теперь x = 6.0</span></div>
+    <div class="code-line">x **= <span class="number">2</span>  <span class="comment"># x = x ** 2, теперь x = 36.0</span></div>
+</div>
+
+<h2>Операторы сравнения</h2>
+<p>Используются для сравнения двух значений. Возвращают <span class="highlight">True</span> (истина) или <span class="highlight">False</span> (ложь).</p>
+
+<div class="code-block">
+    <div class="code-line">x = <span class="number">10</span></div>
+    <div class="code-line">y = <span class="number">5</span></div>
+    <div class="code-line"></div>
+    <div class="code-line">равно = x == y          <span class="comment"># False (10 равно 5?)</span></div>
+    <div class="code-line">не_равно = x != y       <span class="comment"># True (10 не равно 5?)</span></div>
+    <div class="code-line">больше = x > y          <span class="comment"># True (10 больше 5?)</span></div>
+    <div class="code-line">меньше = x < y          <span class="comment"># False (10 меньше 5?)</span></div>
+    <div class="code-line">больше_или_равно = x >= y <span class="comment"># True (10 больше или равно 5?)</span></div>
+    <div class="code-line">меньше_или_равно = x <= y <span class="comment"># False (10 меньше или равно 5?)</span></div>
+</div>
+
+<h2>Логические операторы</h2>
+<p>Используются для комбинирования условий:</p>
+
+<div class="code-block">
+    <div class="code-line">age = <span class="number">25</span></div>
+    <div class="code-line">has_license = <span class="keyword">True</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># and (И) - истинно, если оба условия истинны</span></div>
+    <div class="code-line">can_drive = (age >= <span class="number">18</span>) <span class="keyword">and</span> has_license  <span class="comment"># True</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># or (ИЛИ) - истинно, если хотя бы одно условие истинно</span></div>
+    <div class="code-line">has_discount = (age < <span class="number">18</span>) <span class="keyword">or</span> (age >= <span class="number">65</span>)  <span class="comment"># False</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># not (НЕ) - инвертирует значение</span></div>
+    <div class="code-line">cannot_drive = <span class="keyword">not</span> can_drive  <span class="comment"># False</span></div>
+</div>
+
+<div class="example-box">
+    <h3>Пример: Проверка входа в клуб</h3>
+    <div class="code-block">
+        <div class="code-line">age = <span class="number">20</span></div>
+        <div class="code-line">has_id = <span class="keyword">True</span></div>
+        <div class="code-line">is_vip = <span class="keyword">False</span></div>
+        <div class="code-line"></div>
+        <div class="code-line"><span class="keyword"># Можно войти, если возраст >= 18 И есть ID ИЛИ если VIP</span></div>
+        <div class="code-line">can_enter = (age >= <span class="number">18</span> <span class="keyword">and</span> has_id) <span class="keyword">or</span> is_vip</div>
+        <div class="code-line"><span class="keyword">print</span>(<span class="string">"Можно войти?"</span>, can_enter)  <span class="comment"># True</span></div>
+    </div>
+</div>
+
+<h2>Операции над строками</h2>
+
+<h3>Конкатенация (сложение строк)</h3>
+<div class="code-block">
+    <div class="code-line">greeting = <span class="string">"Привет"</span> + <span class="string">" "</span> + <span class="string">"мир"</span> + <span class="string">"!"</span></div>
+    <div class="code-line"><span class="keyword">print</span>(greeting)  <span class="comment"># "Привет мир!"</span></div>
+</div>
+
+<h3>Умножение строк</h3>
+<div class="code-block">
+    <div class="code-line">line = <span class="string">"-"</span> * <span class="number">30</span></div>
+    <div class="code-line"><span class="keyword">print</span>(line)  <span class="comment"># "------------------------------"</span></div>
+</div>
+
+<h3>Индексация и срезы</h3>
+<div class="code-block">
+    <div class="code-line">text = <span class="string">"Python"</span></div>
+    <div class="code-line"></div>
+    <div class="code-line">первый_символ = text[<span class="number">0</span>]      <span class="comment"># "P" (индексация с 0!)</span></div>
+    <div class="code-line">последний_символ = text[-<span class="number">1</span>]    <span class="comment"># "n"</span></div>
+    <div class="code-line">срез = text[<span class="number">2</span>:<span class="number">5</span>]           <span class="comment"># "tho" (символы с 2 по 4)</span></div>
+    <div class="code-line">первые_три = text[:<span class="number">3</span>]        <span class="comment"># "Pyt" (с начала до 3)</span></div>
+    <div class="code-line">последние_три = text[-<span class="number">3</span>:]     <span class="comment"># "hon" (последние 3 символа)</span></div>
+</div>
+
+<h3>Методы строк</h3>
+<div class="code-block">
+    <div class="code-line">text = <span class="string">"  Привет, Мир!  "</span></div>
+    <div class="code-line"></div>
+    <div class="code-line">без_пробелов = text.strip()       <span class="comment"># "Привет, Мир!"</span></div>
+    <div class="code-line">верхний_регистр = text.upper()    <span class="comment"># "  ПРИВЕТ, МИР!  "</span></div>
+    <div class="code-line">нижний_регистр = text.lower()     <span class="comment"># "  привет, мир!  "</span></div>
+    <div class="code-line">замена = text.replace(<span class="string">"Мир"</span>, <span class="string">"Python"</span>)  <span class="comment"># "  Привет, Python!  "</span></div>
+    <div class="code-line">разделение = text.split(<span class="string">","</span>)     <span class="comment"># ['  Привет', ' Мир!  ']</span></div>
+    <div class="code-line">длина = <span class="keyword">len</span>(text)                 <span class="comment"># 15 (количество символов)</span></div>
+</div>
+
+<h3>Форматирование строк</h3>
+
+<div class="code-block">
+    <div class="code-line">name = <span class="string">"Анна"</span></div>
+    <div class="code-line">age = <span class="number">25</span></div>
+    <div class="code-line">height = <span class="number">1.65</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># f-строки (рекомендуемый способ)</span></div>
+    <div class="code-line">message = <span class="string">f"Меня зовут {name}, мне {age} лет, мой рост {height:.2f} м"</span></div>
+    <div class="code-line"><span class="keyword">print</span>(message)  <span class="comment"># "Меня зовут Анна, мне 25 лет, мой рост 1.65 м"</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># Метод format()</span></div>
+    <div class="code-line">message2 = <span class="string">"Меня зовут {}, мне {} лет"</span>.<span class="keyword">format</span>(name, age)</div>
+    <div class="code-line"><span class="keyword">print</span>(message2)  <span class="comment"># "Меня зовут Анна, мне 25 лет"</span></div>
+</div>
+
+<h2>Приоритет операторов</h2>
+<p>Операторы выполняются в определённом порядке (от высшего к низшему):</p>
+
+<ol>
+    <li><span class="highlight">**</span> — возведение в степень</li>
+    <li><span class="highlight">*, /, //, %</span> — умножение, деление, целочисленное деление, остаток</li>
+    <li><span class="highlight">+, -</span> — сложение, вычитание</li>
+    <li><span class="highlight">==, !=, >, <, >=, <=</span> — сравнение</li>
+    <li><span class="highlight">not</span> — логическое НЕ</li>
+    <li><span class="highlight">and</span> — логическое И</li>
+    <li><span class="highlight">or</span> — логическое ИЛИ</li>
+</ol>
+
+<div class="code-block">
+    <div class="code-line">result = <span class="number">5</span> + <span class="number">3</span> * <span class="number">2</span> ** <span class="number">2</span>  <span class="comment"># Сначала 2**2=4, потом 3*4=12, потом 5+12=17</span></div>
+    <div class="code-line"><span class="keyword">print</span>(result)  <span class="comment"># 17</span></div>
+    <div class="code-line"></div>
+    <div class="code-line"><span class="keyword"># Используйте скобки для изменения порядка</span></div>
+    <div class="code-line">result2 = (<span class="number">5</span> + <span class="number">3</span>) * <span class="number">2</span> ** <span class="number">2</span>  <span class="comment"># Сначала 5+3=8, потом 2**2=4, потом 8*4=32</span></div>
+    <div class="code-line"><span class="keyword">print</span>(result2)  <span class="comment"># 32</span></div>
+</div>
+
+<div class="note">
+    <p><strong>Совет:</strong> Всегда используйте скобки для сложных выражений, даже если они не требуются. Это сделает ваш код понятнее и предотвратит ошибки.</p>
+</div>
+</body>
+</html>

@@ -40,4 +40,7 @@ object AppColors {
 
     val ErrorRed = Color(0xFFFF0000) // #FF0000
     // текст ошибки
+
+    val DoneGreen = Color(0xFF11EF4B) // 11EF4B
+    // пройденный уровень
 }
