@@ -247,7 +247,7 @@ fun ChatScreen(
                         contentPadding = PaddingValues(vertical = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(chats.sortedByDescending { it.id }) { chat ->
+                        items(chats) { chat ->
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()

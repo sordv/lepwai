@@ -28,10 +28,7 @@ import java.io.File
 import javax.net.ssl.*
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
-
-// Authorization Key
-private const val GIGACHAT_AUTH =
-    "Basic MDE5YjExZGEtYWQzZS03MDQ4LTkyZTMtYmVjODMxZTZmNjQ4OjJlZTcwNjZmLTQzNmItNGFhNi04MzU4LTg0NzJjNTY5NTgyNQ=="
+import ai.LocalAiClient
 
 object Users : Table("users") {
     val login = varchar("login", 30)
@@ -135,148 +132,6 @@ fun connectToDatabase(
     return Database.connect(ds)
 }
 
-private fun trustAllSslClient(): HttpClient {
-    val trustAllManager = object : X509TrustManager {
-        override fun checkClientTrusted(
-            chain: Array<X509Certificate>,
-            authType: String
-        ) {}
-
-        override fun checkServerTrusted(
-            chain: Array<X509Certificate>,
-            authType: String
-        ) {}
-
-        override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
-    }
-
-    return HttpClient(CIO) {
-
-        engine {
-            https {
-                trustManager = trustAllManager
-            }
-        }
-
-        install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
-            json(
-                Json {
-                    ignoreUnknownKeys = true
-                    encodeDefaults = true
-                }
-            )
-        }
-    }
-}
-
-private val httpClient = trustAllSslClient()
-
-suspend fun getGigaChatToken(): String {
-    try {
-        println("DEBUG: Requesting GigaChat token with auth: ${GIGACHAT_AUTH.take(30)}...")
-
-        val response = httpClient.post(
-            "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
-        ) {
-            header(HttpHeaders.Authorization, GIGACHAT_AUTH)
-            header(HttpHeaders.ContentType, "application/x-www-form-urlencoded")
-            header("Accept", "application/json")
-
-            setBody("scope=GIGACHAT_API_PERS")
-        }
-
-        val status = response.status.value
-        val text = response.bodyAsText()
-        println("DEBUG: GigaChat token response status: $status")
-        println("DEBUG: GigaChat token response body: $text")
-
-        if (status != 200) {
-            throw RuntimeException("GigaChat token request failed with status $status: $text")
-        }
-
-        val json = Json.parseToJsonElement(text).jsonObject
-        val token = json["access_token"]?.jsonPrimitive?.content
-            ?: error("No access_token in response: $json")
-
-        println("DEBUG: Successfully obtained token: ${token.take(20)}...")
-        return token
-
-    } catch (e: Exception) {
-        println("ERROR: Failed to get GigaChat token: ${e.message}")
-        e.printStackTrace()
-        throw e
-    }
-}
-
-
-suspend fun askGigaChat(
-    history: List<MessageDto>,
-    userMessage: String
-): String {
-    return try {
-        println("DEBUG: Asking GigaChat with message: ${userMessage.take(50)}...")
-
-        val token = getGigaChatToken()
-        println("DEBUG: Using token: ${token.take(20)}...")
-
-        val messages = history.map { msg ->
-            mapOf(
-                "role" to if (msg.isUserMsg) "user" else "assistant",
-                "content" to msg.content  // Упрощенный формат
-            )
-        } + mapOf(
-            "role" to "user",
-            "content" to userMessage
-        )
-
-        println("DEBUG: Sending request to GigaChat API...")
-
-        val responseText = httpClient.post(
-            "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
-        ) {
-            header(HttpHeaders.Authorization, "Bearer $token")
-            header(HttpHeaders.Accept, "application/json")
-            header(HttpHeaders.ContentType, "application/json")
-
-            setBody(
-                mapOf(
-                    "model" to "GigaChat",
-                    "messages" to messages,
-                    "temperature" to 0.7,
-                    "max_tokens" to 512,
-                    "stream" to false
-                )
-            )
-        }.bodyAsText()
-
-        println("DEBUG: GigaChat raw response: $responseText")
-
-        val json = Json.parseToJsonElement(responseText).jsonObject
-
-        // Проверка на ошибку
-        if (json.containsKey("error")) {
-            val error = json["error"]?.jsonObject
-            throw RuntimeException("GigaChat API error: $error")
-        }
-
-        // Исправленный путь к данным
-        val content = json["choices"]
-            ?.jsonArray?.firstOrNull()
-            ?.jsonObject?.get("message")
-            ?.jsonObject?.get("content")
-            ?.jsonPrimitive?.content
-            ?: throw RuntimeException("Invalid response format: $json")
-
-        println("DEBUG: GigaChat response successful: ${content.take(50)}...")
-        content
-
-    } catch (e: Exception) {
-        println("ERROR in askGigaChat: ${e.message}")
-        e.printStackTrace()
-        "Извините, произошла ошибка при обращении к GigaChat: ${e.message}. Пожалуйста, попробуйте позже."
-    }
-}
-
 fun main() {
     val dbHost = System.getenv("DB_HOST") ?: "127.0.0.1"
     val dbPort = (System.getenv("DB_PORT") ?: "5432").toInt()
@@ -298,7 +153,14 @@ fun main() {
     }
 
     embeddedServer(Netty, port = httpPort) {
-        install(ContentNegotiation) { json() }
+        install(ContentNegotiation) {
+            json(
+                Json {
+                    ignoreUnknownKeys = true
+                    encodeDefaults = true
+                }
+            )
+        }
         routing {
             get("/") {
                 call.respondText("lepwai Ktor server running")
@@ -631,8 +493,15 @@ fun main() {
                 val login = call.request.headers["X-User-Login"]!!
 
                 call.respond(transaction {
-                    Chats.select { Chats.userLogin eq login }
-                        .map { ChatDto(it[Chats.id].value, it[Chats.title]) }
+                    Chats
+                        .select { Chats.userLogin eq login }
+                        .orderBy(Chats.id, SortOrder.DESC)
+                        .map {
+                            ChatDto(
+                                it[Chats.id].value,
+                                it[Chats.title]
+                            )
+                        }
                 })
             }
 
@@ -689,15 +558,26 @@ fun main() {
                 }
 
                 // 3. получаем ответ бота (или текст ошибки)
-                println("DEBUG: Attempting to ask GigaChat...")
+                println("DEBUG: Asking Local AI (Ollama)...")
+
                 val botReply: String = try {
-                    askGigaChat(history, req.message)
+                    val aiMessages = history.map {
+                        ai.LocalAiClient.Message(
+                            role = if (it.isUserMsg) "user" else "assistant",
+                            content = it.content
+                        )
+                    }
+
+                    LocalAiClient.ask(aiMessages)
+
                 } catch (e: Throwable) {
-                    println("ERROR in chat/send GigaChat call: ${e.message}")
+                    println("ERROR in LocalAiClient: ${e.message}")
                     e.printStackTrace()
                     "⚠️ Бот временно недоступен. Попробуйте позже."
                 }
-                println("DEBUG: GigaChat replied: ${botReply.take(50)}...")
+
+                println("DEBUG: AI replied: ${botReply.take(50)}...")
+
 
                 // 4. сохраняем сообщение бота В ЛЮБОМ СЛУЧАЕ
                 val botMessageId = transaction {
@@ -733,13 +613,23 @@ fun main() {
                 call.respond(HttpStatusCode.OK)
             }
 
-            get("/gigachat/test") {
+            get("/ai/test") {
                 try {
-                    val reply = askGigaChat(emptyList(), "Привет")
-                    call.respondText(reply)
-                } catch (e: Throwable) {
-                    e.printStackTrace()
-                    call.respondText("ERROR: ${e.message}", status = HttpStatusCode.InternalServerError)
+                    val answer = LocalAiClient.ask(
+                        listOf(
+                            ai.LocalAiClient.Message(
+                                role = "user",
+                                content = "Объясни что такое if else простыми словами"
+                            )
+                        )
+                    )
+                    call.respondText(answer)
+                } catch (e: Exception) {
+                    e.printStackTrace() // ← ВАЖНО
+                    call.respondText(
+                        "ERROR: ${e::class.simpleName}\n${e.message}",
+                        status = HttpStatusCode.InternalServerError
+                    )
                 }
             }
 

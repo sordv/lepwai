@@ -28,10 +28,17 @@ class ChatViewModel(
     val messages = MutableStateFlow<List<UiMessage>>(emptyList())
     val currentChatId = MutableStateFlow<Int?>(null)
 
-    fun loadChats() = scope.launch {
-        chats.value = client.get("http://10.0.2.2:8080/chat/list") {
+    fun loadChats(selectLastIfEmpty: Boolean = true) = scope.launch {
+        val loadedChats: List<ChatDto> = client.get("http://10.0.2.2:8080/chat/list") {
             header("X-User-Login", login)
         }.body()
+
+        chats.value = loadedChats
+
+        if (selectLastIfEmpty &&
+            currentChatId.value == null &&
+            loadedChats.isNotEmpty()
+        ) { loadChat(loadedChats.first().id) }
     }
 
     fun loadChat(id: Int) = scope.launch {
@@ -62,41 +69,23 @@ class ChatViewModel(
         messages.value = messages.value + tempMsg
 
         try {
-            // 2. Получаем ответ КАК ТЕКСТ
-            val responseText = client.post("http://10.0.2.2:8080/chat/send") {
+            val resp: SendMessageResponse = client.post("http://10.0.2.2:8080/chat/send") {
                 header("X-User-Login", login)
                 contentType(ContentType.Application.Json)
                 setBody(SendMessageRequest(chatId, text))
-            }.bodyAsText()
-
-            // 3. Парсим JSON вручную
-            val json = kotlinx.serialization.json.Json {
-                ignoreUnknownKeys = true
-            }
-
-            // 4. Проверяем: это ошибка?
-            val element = json.parseToJsonElement(responseText)
-
-            if (element is kotlinx.serialization.json.JsonObject && element["error"] != null) {
-                // сервер вернул ошибку
-                messages.value = messages.value + UiMessage(
-                    id = -1,
-                    isUser = false,
-                    text = "Ошибка сервера. Попробуйте позже."
-                )
-                return@launch
-            }
-
-            // 5. Это нормальный ответ
-            val resp = json.decodeFromString<SendMessageResponse>(responseText)
+            }.body()
 
             currentChatId.value = resp.chatId
 
             messages.value = resp.messages.map {
-                UiMessage(it.id, it.isUserMsg, it.content)
+                UiMessage(
+                    it.id,
+                    it.isUserMsg,
+                    it.content
+                )
             }
 
-            loadChats()
+            loadChats(selectLastIfEmpty = false)
 
         } catch (e: Exception) {
             println("SERVER ERROR: ${e.message}")
