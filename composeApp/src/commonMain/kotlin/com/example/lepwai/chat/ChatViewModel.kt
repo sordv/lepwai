@@ -11,11 +11,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
-data class UiMessage(
-    val id: Int,
-    val isUser: Boolean,
-    val text: String
-)
+data class UiMessage(val id: Int, val isUser: Boolean, val text: String)
 
 class ChatViewModel(
     private val login: String

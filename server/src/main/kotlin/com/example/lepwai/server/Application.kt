@@ -625,15 +625,13 @@ fun main() {
                     )
                     call.respondText(answer)
                 } catch (e: Exception) {
-                    e.printStackTrace() // ← ВАЖНО
+                    e.printStackTrace()
                     call.respondText(
                         "ERROR: ${e::class.simpleName}\n${e.message}",
                         status = HttpStatusCode.InternalServerError
                     )
                 }
             }
-
-
         }
     }.start(wait = true)
 }

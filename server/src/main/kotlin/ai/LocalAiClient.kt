@@ -18,7 +18,7 @@ object LocalAiClient {
 
         install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
             json(
-                Json {
+                kotlinx.serialization.json.Json {
                     ignoreUnknownKeys = true
                     encodeDefaults = true
                 }
@@ -40,30 +40,14 @@ object LocalAiClient {
 Отвечай на русском языке.
 """
 
-    @Serializable
-    data class Message(
-        val role: String,
-        val content: String
-    )
-
-    @Serializable
-    data class ChatRequest(
-        val model: String,
-        val messages: List<Message>,
-        val stream: Boolean = false
-    )
-
-    @Serializable
-    data class ChatResponse(
-        val message: Message
-    )
+    @Serializable data class Message(val role: String, val content: String)
+    @Serializable data class ChatRequest(val model: String, val messages: List<Message>, val stream: Boolean = false)
+    @Serializable data class ChatResponse(val message: Message)
 
     suspend fun ask(messagesFromDb: List<Message>): String {
         val messages = mutableListOf<Message>()
-
         // system prompt всегда первый
         messages += Message("system", SYSTEM_PROMPT.trim())
-
         // история чата
         messages += messagesFromDb
 
