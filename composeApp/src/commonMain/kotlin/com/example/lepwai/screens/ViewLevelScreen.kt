@@ -20,7 +20,7 @@ import com.example.lepwai.theme.AppColors
 import com.example.lepwai.ui.HtmlView
 import kotlinx.coroutines.launch
 
-enum class RunState { None, CompileError, WrongAnswer, Success }
+enum class RunState { None, CompileError, WrongAnswer, HiddenFailed, Success }
 
 @Composable
 fun ViewLevelScreen(
@@ -181,6 +181,7 @@ fun ViewLevelScreen(
                                 .background(
                                     when (runState) {
                                         RunState.Success -> AppColors.DoneGreen
+                                        RunState.HiddenFailed -> AppColors.MainBlue
                                         RunState.WrongAnswer -> AppColors.ErrorRed
                                         RunState.CompileError -> AppColors.DifficultyMedium
                                         else -> AppColors.DifficultyMedium
@@ -191,6 +192,7 @@ fun ViewLevelScreen(
                             Text(
                                 text = when (runState) {
                                     RunState.Success -> "Выполнено"
+                                    RunState.HiddenFailed -> "Не пройден скрытый тест"
                                     RunState.WrongAnswer -> "Не верно"
                                     RunState.CompileError -> "Ошибка кода"
                                     else -> ""
@@ -246,13 +248,16 @@ fun ViewLevelScreen(
                                         )
 
                                         output = result.output
-                                        runState = when {
-                                            result.compileError -> RunState.CompileError
-                                            result.success -> RunState.Success
-                                            else -> RunState.WrongAnswer
+                                        runState = when (result.status) {
+                                            "compile_error" -> RunState.CompileError
+                                            "wrong_answer" -> RunState.WrongAnswer
+                                            "hidden_failed" -> RunState.HiddenFailed
+                                            "success" -> {
+                                                completed = true
+                                                RunState.Success
+                                            }
+                                            else -> RunState.None
                                         }
-
-                                        if (result.success) completed = true
                                     }
                                 }
                         )

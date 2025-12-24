@@ -60,8 +60,11 @@ object Levels : Table("levels") {
     val sort = integer("sort")
     val parent = integer("parent")
     val value = text("value")
-    val answer = text("answer").nullable()
     val difficulty = integer("difficulty").nullable()
+    val input1 = text("input1").nullable()
+    val input2 = text("input2").nullable()
+    val answer1 = text("answer1").nullable()
+    val answer2 = text("answer2").nullable()
     override val primaryKey = PrimaryKey(id)
 }
 
@@ -93,11 +96,11 @@ object UserLevelProgress : IntIdTable("user_level_progress") {
 
 @kotlinx.serialization.Serializable data class CourseDTO(val id: Int, val name: String, val sort: Int)
 @kotlinx.serialization.Serializable data class TopicDTO(val id: Int, val name: String, val sort: Int, val parent: Int)
-@kotlinx.serialization.Serializable data class LevelDTO(val id: Int, val name: String, val sort: Int, val parent: Int, val value: String, val answer: String?, val difficulty: Int?)
+@kotlinx.serialization.Serializable data class LevelDTO(val id: Int, val name: String, val sort: Int, val parent: Int, val value: String, val input1: String?, val input2: String?, val difficulty: Int?)
 
 @Serializable data class LevelProgressDto(val levelId: Int, val status: String, val answer: String? = null)
 @Serializable data class RunPracticeRequest(val login: String, val levelId: Int, val code: String)
-@Serializable data class RunPracticeResponse(val success: Boolean, val output: String, val compileError: Boolean)
+@Serializable data class RunPracticeResponse(val status: String, val output: String)
 
 @Serializable data class CompleteLevelRequest(val login: String, val levelId: Int)
 @Serializable data class ChatDto(val id: Int, val title: String)
@@ -470,7 +473,8 @@ fun main() {
                                     sort = row[Levels.sort],
                                     parent = row[Levels.parent],
                                     value = row[Levels.value],
-                                    answer = row[Levels.answer],
+                                    input1 = row[Levels.input1],
+                                    input2 = row[Levels.input2],
                                     difficulty = row[Levels.difficulty]
                                 )
                             }
@@ -507,7 +511,8 @@ fun main() {
                                     sort = row[Levels.sort],
                                     parent = row[Levels.parent],
                                     value = row[Levels.value],
-                                    answer = row[Levels.answer],
+                                    input1 = row[Levels.input1],
+                                    input2 = row[Levels.input2],
                                     difficulty = row[Levels.difficulty]
                                 )
                             }
@@ -571,37 +576,42 @@ fun main() {
                 val req = call.receive<RunPracticeRequest>()
 
                 val level = transaction {
-                    Levels.select { Levels.id eq req.levelId }
-                        .firstOrNull()
-                } ?: run {
-                    call.respond(HttpStatusCode.NotFound)
-                    return@post
+                    Levels.select { Levels.id eq req.levelId }.first()
                 }
 
-                val expectedOutput = level[Levels.answer] ?: ""
+                val language = detectLanguageByLevelId(db!!, req.levelId)
+                //println("RUN PRACTICE: level=${req.levelId}, language=$language")
 
-                val topic = transaction {
-                    Topics.select { Topics.id eq level[Levels.parent] }.first()
+                fun runTest(input: String?, expected: String): Pair<String, Boolean> {
+                    val fullCode = "${input ?: ""}\n${req.code}"
+
+                    val (out, ok, compileError) = runCode(
+                        code = fullCode,
+                        language = language,
+                        expectedOutput = expected
+                    )
+
+                    if (compileError) {
+                        throw RuntimeException(out.ifBlank { "Ошибка выполнения" })
+                    }
+
+                    return out to ok
                 }
 
-                val course = transaction {
-                    Courses.select { Courses.id eq topic[Topics.parent] }.first()
-                }
+                try {
+                    val (out1, ok1) = runTest(level[Levels.input1], level[Levels.answer1]!!)
+                    if (!ok1) {
+                        call.respond(RunPracticeResponse("wrong_answer", out1))
+                        return@post
+                    }
 
-                val language = when (course[Courses.name].lowercase()) {
-                    "python" -> "python"
-                    "javascript" -> "javascript"
-                    else -> "python"
-                }
+                    val (out2, ok2) = runTest(level[Levels.input2], level[Levels.answer2]!!)
+                    if (!ok2) {
+                        call.respond(RunPracticeResponse("hidden_failed", out1))
+                        return@post
+                    }
 
-                val (output, success, compileError) = runCode(
-                    code = req.code,
-                    language = language,
-                    expectedOutput = expectedOutput
-                )
-
-                if (success) {
-                    transaction {
+                    transaction(db!!) {
                         UserLevelProgress.insertIgnore {
                             it[userLogin] = req.login
                             it[levelId] = req.levelId
@@ -609,15 +619,12 @@ fun main() {
                             it[answer] = req.code
                         }
                     }
-                }
 
-                call.respond(
-                    RunPracticeResponse(
-                        success = success,
-                        output = output,
-                        compileError = compileError
-                    )
-                )
+                    call.respond(RunPracticeResponse("success", out1))
+
+                } catch (e: RuntimeException) {
+                    call.respond(RunPracticeResponse("compile_error", e.message ?: "Ошибка"))
+                }
             }
 
             get("/chat/list") {
@@ -768,13 +775,41 @@ expectedOutput: String
         return Triple(e.message ?: "Compilation error", false, true)
     }
 
-    val output = process.inputStream.bufferedReader().readText().trim()
+    val output = process.inputStream.bufferedReader().readText()
+
     val exitCode = process.waitFor()
 
     file.delete()
 
     val compileError = exitCode != 0
-    val success = !compileError && output == expectedOutput.trim()
+    val success = !compileError && output.trim() == expectedOutput.trim()
 
     return Triple(output, success, compileError)
+}
+
+fun detectLanguageByLevelId(db: Database, levelId: Int): String {
+    return transaction(db) {
+
+        val topicId = Levels
+            .slice(Levels.parent)
+            .select { Levels.id eq levelId }
+            .first()[Levels.parent]
+
+        val courseId = Topics
+            .slice(Topics.parent)
+            .select { Topics.id eq topicId }
+            .first()[Topics.parent]
+
+        val courseName = Courses
+            .slice(Courses.name)
+            .select { Courses.id eq courseId }
+            .first()[Courses.name]
+            .lowercase()
+
+        when {
+            "python" in courseName -> "python"
+            "js" in courseName || "javascript" in courseName -> "javascript"
+            else -> error("Unknown course language: $courseName")
+        }
+    }
 }
