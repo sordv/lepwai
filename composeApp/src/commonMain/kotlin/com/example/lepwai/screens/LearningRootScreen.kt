@@ -7,7 +7,8 @@ import com.example.lepwai.data.LearningNavigationState
 fun LearningRootScreen(
     userLogin: String,
     learningState: LearningNavigationState,
-    onResetToCourses: () -> Unit = {}
+    onResetToCourses: () -> Unit = {},
+    onOpenChatWithPrefill: (String) -> Unit
 ) {
     when {
         learningState.selectedCourseId == null -> {
@@ -60,9 +61,13 @@ fun LearningRootScreen(
                 userLogin = userLogin,
                 levelId = learningState.selectedLevelId!!,
                 levelName = learningState.selectedLevelName ?: "",
+                courseName = learningState.selectedCourseName ?: "",
                 onBack = {
                     learningState.selectedLevelId = null
                     learningState.selectedLevelName = null
+                },
+                onOpenChat = { prompt ->
+                    onOpenChatWithPrefill(prompt)
                 }
             )
         }

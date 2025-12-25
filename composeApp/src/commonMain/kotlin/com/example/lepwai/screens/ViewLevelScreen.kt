@@ -27,7 +27,9 @@ fun ViewLevelScreen(
     userLogin: String,
     levelId: Int,
     levelName: String,
-    onBack: () -> Unit = {}
+    courseName: String,
+    onBack: () -> Unit = {},
+    onOpenChat: (String) -> Unit
 ) {
     val client = remember { createHttpClient() }
     val api = remember { ChooseLevelApi(client, "http://10.0.2.2:8080") }
@@ -229,7 +231,14 @@ fun ViewLevelScreen(
                         imageVector = Icons.Default.QuestionAnswer,
                         contentDescription = "Вопрос",
                         tint = AppColors.ButtonGray,
-                        modifier = Modifier.size(65.dp)
+                        modifier = Modifier
+                            .size(65.dp)
+                            .clickable {
+                                level?.let { lvl ->
+                                    val prompt = "Привет, помоги мне с заданием на $courseName: ${lvl.value}"
+                                    onOpenChat(prompt)
+                                }
+                            }
                     )
 
                     if (!completed) {

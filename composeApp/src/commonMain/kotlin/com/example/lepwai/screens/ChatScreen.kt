@@ -25,7 +25,8 @@ import com.example.lepwai.theme.TextInputField
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
-    settingsRepo: SettingsRepo
+    settingsRepo: SettingsRepo,
+    prefillText: String? = null
 ) {
     val login = remember { settingsRepo.getCurrentLogin() }
 
@@ -73,6 +74,13 @@ fun ChatScreen(
 
     var drawer by remember { mutableStateOf(false) }
     var input by remember { mutableStateOf("") }
+    LaunchedEffect(prefillText) {
+        if (prefillText != null) {
+            vm.startNewChat()
+            input = prefillText
+        }
+    }
+
     var deleteChatId by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit) { vm.loadChats() }

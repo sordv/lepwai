@@ -72,6 +72,7 @@ fun App(settingsRepo: SettingsRepo) {
     // if logged in
     var selectedScreen by remember { mutableStateOf("learning") }
 
+    var chatPrefill by remember { mutableStateOf<String?>(null) }
     // Learning navigation state (переходит в LearningRootScreen)
     val learningState = remember { LearningNavigationState() }
 
@@ -139,9 +140,16 @@ fun App(settingsRepo: SettingsRepo) {
                             learningState.selectedCourseId = null
                             learningState.selectedTopicId = null
                             learningState.selectedLevelId = null
+                        },
+                        onOpenChatWithPrefill = { prompt ->
+                            chatPrefill = prompt
+                            selectedScreen = "chat"
                         }
                     )
-                    "chat" -> ChatScreen(settingsRepo = settingsRepo)
+                    "chat" -> ChatScreen(
+                        settingsRepo = settingsRepo,
+                        prefillText = chatPrefill
+                    )
                     "profile" -> ProfileScreen(
                         settingsRepo = settingsRepo,
                         onLogout = {
