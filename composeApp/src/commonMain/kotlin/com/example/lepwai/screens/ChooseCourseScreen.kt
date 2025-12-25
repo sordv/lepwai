@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.lepwai.config.ServerConfig
 import com.example.lepwai.network.*
 import com.example.lepwai.theme.AppColors
 
@@ -21,9 +22,9 @@ fun ChooseCourseScreen(
 ) {
 
     val client = remember { createHttpClient() }
-    val courseApi = remember { ChooseCourseApi(client, "http://10.0.2.2:8080") }
-    val topicApi = remember { ChooseTopicApi(client, "http://10.0.2.2:8080") }
-    val levelApi = remember { ChooseLevelApi(client, "http://10.0.2.2:8080") }
+    val courseApi = remember { ChooseCourseApi(client, ServerConfig.BASE_URL) }
+    val topicApi = remember { ChooseTopicApi(client, ServerConfig.BASE_URL) }
+    val levelApi = remember { ChooseLevelApi(client, ServerConfig.BASE_URL) }
 
     var courses by remember { mutableStateOf<List<Course>>(emptyList()) }
     var completedLevels by remember { mutableStateOf<Set<Int>>(emptySet()) }

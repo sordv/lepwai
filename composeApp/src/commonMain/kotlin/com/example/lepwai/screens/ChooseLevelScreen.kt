@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.lepwai.config.ServerConfig
 import com.example.lepwai.network.ChooseLevelApi
 import com.example.lepwai.network.Level
 import com.example.lepwai.network.createHttpClient
@@ -30,7 +31,7 @@ fun ChooseLevelScreen(
 ) {
 
     val client = remember { createHttpClient() }
-    val api = remember { ChooseLevelApi(client, "http://10.0.2.2:8080") }
+    val api = remember { ChooseLevelApi(client, ServerConfig.BASE_URL) }
 
     var levels by remember { mutableStateOf<List<Level>>(emptyList()) }
     var completedLevels by remember { mutableStateOf<Set<Int>>(emptySet()) }

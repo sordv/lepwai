@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.graphicsLayer
+import com.example.lepwai.config.ServerConfig
 import com.example.lepwai.screens.ChatScreen
 import com.example.lepwai.screens.ProfileScreen
 import com.example.lepwai.screens.LearningRootScreen
@@ -42,7 +43,7 @@ import io.ktor.client.*
 @Composable
 fun App(settingsRepo: SettingsRepo) {
     val httpClient: HttpClient = remember { createHttpClient() }
-    val authApi: AuthApi = remember { AuthApi(httpClient, "http://10.0.2.2:8080") }
+    val authApi: AuthApi = remember { AuthApi(httpClient, ServerConfig.BASE_URL) }
     var loggedInUser by remember { mutableStateOf(settingsRepo.loadLogin()) }
     var authScreen by remember { mutableStateOf("login") }
 
@@ -113,7 +114,7 @@ fun App(settingsRepo: SettingsRepo) {
                                 ) {
                                     val selected = selectedScreen == screen.route
                                     val scale by animateFloatAsState(
-                                        targetValue = if (selected) 1.2f else 1f,
+                                        targetValue = if (selected) 1f else 0.85f,
                                         label = "nav_icon_scale"
                                     )
 

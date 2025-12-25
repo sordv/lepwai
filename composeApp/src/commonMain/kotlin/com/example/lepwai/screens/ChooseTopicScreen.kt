@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.lepwai.config.ServerConfig
 import com.example.lepwai.network.*
 import com.example.lepwai.theme.AppColors
 
@@ -27,8 +28,8 @@ fun ChooseTopicScreen(
 ) {
 
     val client = remember { createHttpClient() }
-    val topicApi = remember { ChooseTopicApi(client, "http://10.0.2.2:8080") }
-    val levelApi = remember { ChooseLevelApi(client, "http://10.0.2.2:8080") }
+    val topicApi = remember { ChooseTopicApi(client, ServerConfig.BASE_URL) }
+    val levelApi = remember { ChooseLevelApi(client, ServerConfig.BASE_URL) }
 
     var topics by remember { mutableStateOf<List<Topic>>(emptyList()) }
     var completedLevels by remember { mutableStateOf<Set<Int>>(emptySet()) }

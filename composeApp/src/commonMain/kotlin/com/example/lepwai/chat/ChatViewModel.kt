@@ -1,5 +1,6 @@
 package com.example.lepwai.chat
 
+import com.example.lepwai.config.ServerConfig
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import io.ktor.client.*
@@ -27,7 +28,7 @@ class ChatViewModel(
     private var pollingJob: Job? = null
 
     fun loadChats(selectLastIfEmpty: Boolean = true) = scope.launch {
-        val loadedChats: List<ChatDto> = client.get("http://10.0.2.2:8080/chat/list") {
+        val loadedChats: List<ChatDto> = client.get("${ServerConfig.BASE_URL}/chat/list") {
             header("X-User-Login", login)
         }.body()
 
@@ -42,7 +43,7 @@ class ChatViewModel(
     fun loadChat(id: Int) = scope.launch {
         currentChatId.value = id
 
-        val list = client.get("http://10.0.2.2:8080/chat/$id") {
+        val list = client.get("${ServerConfig.BASE_URL}/chat/$id") {
             header("X-User-Login", login)
         }.body<List<MessageDto>>()
 
@@ -67,7 +68,7 @@ class ChatViewModel(
 
         try {
             val resp: Map<String, Int> =
-                client.post("http://10.0.2.2:8080/chat/send") {
+                client.post("${ServerConfig.BASE_URL}/chat/send") {
                     header("X-User-Login", login)
                     contentType(ContentType.Application.Json)
                     setBody(SendMessageRequest(chatId, text))
@@ -82,7 +83,7 @@ class ChatViewModel(
     }
 
     fun deleteChat(id: Int) = scope.launch {
-        client.delete("http://10.0.2.2:8080/chat/$id") {
+        client.delete("${ServerConfig.BASE_URL}/chat/$id") {
             header("X-User-Login", login)
         }
         loadChats()
