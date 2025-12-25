@@ -1,5 +1,6 @@
 package com.example.lepwai
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -25,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.graphicsLayer
 import com.example.lepwai.screens.ChatScreen
 import com.example.lepwai.screens.ProfileScreen
 import com.example.lepwai.screens.LearningRootScreen
@@ -73,7 +75,7 @@ fun App(settingsRepo: SettingsRepo) {
     var selectedScreen by remember { mutableStateOf("learning") }
 
     var chatPrefill by remember { mutableStateOf<String?>(null) }
-    // Learning navigation state (переходит в LearningRootScreen)
+
     val learningState = remember { LearningNavigationState() }
 
     val screens = listOf(
@@ -109,10 +111,21 @@ fun App(settingsRepo: SettingsRepo) {
                                     modifier = Modifier.fillMaxSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
+                                    val selected = selectedScreen == screen.route
+                                    val scale by animateFloatAsState(
+                                        targetValue = if (selected) 1.2f else 1f,
+                                        label = "nav_icon_scale"
+                                    )
+
                                     Icon(
                                         imageVector = screen.icon,
                                         contentDescription = screen.label,
-                                        modifier = Modifier.size(66.dp)
+                                        modifier = Modifier
+                                            .size(66.dp)
+                                            .graphicsLayer {
+                                                scaleX = scale
+                                                scaleY = scale
+                                            }
                                     )
                                 }
                             },
@@ -136,11 +149,6 @@ fun App(settingsRepo: SettingsRepo) {
                     "learning" -> LearningRootScreen(
                         userLogin = loggedInUser!!,
                         learningState = learningState,
-                        onResetToCourses = {
-                            learningState.selectedCourseId = null
-                            learningState.selectedTopicId = null
-                            learningState.selectedLevelId = null
-                        },
                         onOpenChatWithPrefill = { prompt ->
                             chatPrefill = prompt
                             selectedScreen = "chat"

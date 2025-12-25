@@ -26,9 +26,9 @@ object LocalAiClient {
         }
 
         install(io.ktor.client.plugins.HttpTimeout) {
-            requestTimeoutMillis = 120_000
-            connectTimeoutMillis = 120_000
-            socketTimeoutMillis = 120_000
+            requestTimeoutMillis = 240_000
+            connectTimeoutMillis = 240_000
+            socketTimeoutMillis = 240_000
         }
     }
 
