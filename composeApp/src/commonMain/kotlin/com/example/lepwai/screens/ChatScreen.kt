@@ -27,9 +27,7 @@ import com.example.lepwai.theme.TextInputField
 fun ChatScreen(
     settingsRepo: SettingsRepo
 ) {
-    val login = remember {
-        settingsRepo.getCurrentLogin()
-    }
+    val login = remember { settingsRepo.getCurrentLogin() }
 
     if (login == null) {
         Box(
@@ -51,7 +49,27 @@ fun ChatScreen(
 
     val chats by vm.chats.collectAsState()
     val messages by vm.messages.collectAsState()
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.lastIndex)
+        }
+    }
+
     val currentChat by vm.currentChatId.collectAsState()
+
+    LaunchedEffect(currentChat) {
+        if (currentChat != null) {
+            vm.startPolling()
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            vm.stopPolling()
+        }
+    }
 
     var drawer by remember { mutableStateOf(false) }
     var input by remember { mutableStateOf("") }
@@ -113,6 +131,7 @@ fun ChatScreen(
 
             // Список сообщений
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 16.dp, vertical = 8.dp)

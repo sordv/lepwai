@@ -24,6 +24,8 @@ class ChatViewModel(
     val messages = MutableStateFlow<List<UiMessage>>(emptyList())
     val currentChatId = MutableStateFlow<Int?>(null)
 
+    private var pollingJob: Job? = null
+
     fun loadChats(selectLastIfEmpty: Boolean = true) = scope.launch {
         val loadedChats: List<ChatDto> = client.get("http://10.0.2.2:8080/chat/list") {
             header("X-User-Login", login)
@@ -56,41 +58,26 @@ class ChatViewModel(
     fun sendMessage(text: String) = scope.launch {
         val chatId = currentChatId.value
 
-        // 1. Оптимистично показываем сообщение сразу
-        val tempMsg = UiMessage(
+        // показываем сразу
+        messages.value += UiMessage(
             id = -System.currentTimeMillis().toInt(),
             isUser = true,
             text = text
         )
-        messages.value = messages.value + tempMsg
 
         try {
-            val resp: SendMessageResponse = client.post("http://10.0.2.2:8080/chat/send") {
-                header("X-User-Login", login)
-                contentType(ContentType.Application.Json)
-                setBody(SendMessageRequest(chatId, text))
-            }.body()
+            val resp: Map<String, Int> =
+                client.post("http://10.0.2.2:8080/chat/send") {
+                    header("X-User-Login", login)
+                    contentType(ContentType.Application.Json)
+                    setBody(SendMessageRequest(chatId, text))
+                }.body()
 
-            currentChatId.value = resp.chatId
-
-            messages.value = resp.messages.map {
-                UiMessage(
-                    it.id,
-                    it.isUserMsg,
-                    it.content
-                )
-            }
-
+            currentChatId.value = resp["chatId"]
             loadChats(selectLastIfEmpty = false)
 
         } catch (e: Exception) {
-            println("SERVER ERROR: ${e.message}")
-
-            messages.value = messages.value + UiMessage(
-                id = -1,
-                isUser = false,
-                text = "Ошибка сервера. Попробуйте позже."
-            )
+            println("SEND FAILED: ${e.message}")
         }
     }
 
@@ -104,5 +91,19 @@ class ChatViewModel(
     fun startNewChat() {
         currentChatId.value = null
         messages.value = emptyList()
+    }
+
+    fun startPolling() {
+        pollingJob?.cancel()
+        pollingJob = scope.launch {
+            while (isActive) {
+                currentChatId.value?.let { loadChat(it) }
+                delay(2000)
+            }
+        }
+    }
+
+    fun stopPolling() {
+        pollingJob?.cancel()
     }
 }

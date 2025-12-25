@@ -29,6 +29,7 @@ import javax.net.ssl.*
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import ai.LocalAiClient
+import kotlinx.coroutines.launch
 
 object Users : Table("users") {
     val login = varchar("login", 30)
@@ -528,6 +529,7 @@ fun main() {
                 val req = call.receive<SendMessageRequest>()
                 println("DEBUG: Request: chatId=${req.chatId}, message=${req.message.take(50)}...")
 
+                // 1. создаём чат если нужно
                 val chatId = req.chatId ?: transaction {
                     Chats.insertAndGetId {
                         it[userLogin] = login
@@ -535,7 +537,7 @@ fun main() {
                     }.value
                 }
 
-                // 1. сохраняем сообщение пользователя
+                // 2. сохраняем сообщение пользователя
                 transaction {
                     Messages.insert {
                         it[Messages.chatId] = chatId
@@ -544,64 +546,40 @@ fun main() {
                     }
                 }
 
-                // 2. история чата
-                val history = transaction {
-                    Messages.select { Messages.chatId eq chatId }
-                        .orderBy(Messages.id)
-                        .map {
-                            MessageDto(
-                                it[Messages.id].value,
-                                it[Messages.isUserMsg],
-                                it[Messages.content]
-                            )
-                        }
-                }
+                // 3. отвечаем клиенту СРАЗУ (он ничего не ждёт)
+                call.respond(HttpStatusCode.OK, mapOf("chatId" to chatId))
 
                 // 3. получаем ответ бота (или текст ошибки)
                 println("DEBUG: Asking Local AI (Ollama)...")
 
-                val botReply: String = try {
-                    val aiMessages = history.map {
-                        ai.LocalAiClient.Message(
-                            role = if (it.isUserMsg) "user" else "assistant",
-                            content = it.content
-                        )
+                // 4. ИИ — в фоне
+                launch {
+                    try {
+                        val history = transaction {
+                            Messages
+                                .select { Messages.chatId eq chatId }
+                                .orderBy(Messages.id)
+                                .map {
+                                    ai.LocalAiClient.Message(
+                                        role = if (it[Messages.isUserMsg]) "user" else "assistant",
+                                        content = it[Messages.content]
+                                    )
+                                }
+                        }
+
+                        val botReply = LocalAiClient.ask(history)
+
+                        transaction {
+                            Messages.insert {
+                                it[Messages.chatId] = chatId
+                                it[isUserMsg] = false
+                                it[content] = botReply
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
-
-                    LocalAiClient.ask(aiMessages)
-
-                } catch (e: Throwable) {
-                    println("ERROR in LocalAiClient: ${e.message}")
-                    e.printStackTrace()
-                    "⚠️ Бот временно недоступен. Попробуйте позже."
                 }
-
-                println("DEBUG: AI replied: ${botReply.take(50)}...")
-
-
-                // 4. сохраняем сообщение бота В ЛЮБОМ СЛУЧАЕ
-                val botMessageId = transaction {
-                    Messages.insertAndGetId {
-                        it[Messages.chatId] = chatId
-                        it[isUserMsg] = false
-                        it[content] = botReply
-                    }.value
-                }
-
-                // 5. обновлённая история
-                val updatedHistory = history + MessageDto(
-                    id = botMessageId,
-                    isUserMsg = false,
-                    content = botReply
-                )
-
-                // 6. ВСЕГДА корректный ответ
-                call.respond(
-                    SendMessageResponse(
-                        chatId = chatId,
-                        messages = updatedHistory
-                    )
-                )
             }
 
             delete("/chat/{id}") {
