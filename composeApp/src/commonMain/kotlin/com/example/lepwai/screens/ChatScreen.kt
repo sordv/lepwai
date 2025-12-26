@@ -26,7 +26,8 @@ import com.example.lepwai.theme.TextInputField
 @Composable
 fun ChatScreen(
     settingsRepo: SettingsRepo,
-    prefillText: String? = null
+    prefillText: String? = null,
+    onPrefillConsumed: () -> Unit
 ) {
     val login = remember { settingsRepo.getCurrentLogin() }
 
@@ -78,6 +79,8 @@ fun ChatScreen(
         if (prefillText != null) {
             vm.startNewChat()
             input = prefillText
+
+            onPrefillConsumed()
         }
     }
 

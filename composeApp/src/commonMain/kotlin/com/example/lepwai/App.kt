@@ -157,7 +157,10 @@ fun App(settingsRepo: SettingsRepo) {
                     )
                     "chat" -> ChatScreen(
                         settingsRepo = settingsRepo,
-                        prefillText = chatPrefill
+                        prefillText = chatPrefill,
+                        onPrefillConsumed = {
+                            chatPrefill = null
+                        }
                     )
                     "profile" -> ProfileScreen(
                         settingsRepo = settingsRepo,
